@@ -1,10 +1,11 @@
+import type { Route } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
 type BackLinkProps = {
-  href: string;
+  href: Route;
   label?: string;
 };
 

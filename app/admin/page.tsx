@@ -1,9 +1,14 @@
+import type { Route } from "next";
 import Link from "next/link";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 
-const ADMIN_LINKS = [
+const ADMIN_LINKS: Array<{
+  href: Route;
+  title: string;
+  description: string;
+}> = [
   {
     href: "/admin/jornadas",
     title: "🗓️ Jornadas",

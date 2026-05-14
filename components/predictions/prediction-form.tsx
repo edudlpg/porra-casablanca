@@ -19,6 +19,7 @@ const SCORE_TYPE_LABELS = {
 const SCORE_TYPE_STYLES = {
   EXACT: {
     variant: "success" as const,
+    className: undefined,
   },
   GOAL_DIFFERENCE: {
     variant: "warning" as const,
@@ -26,9 +27,11 @@ const SCORE_TYPE_STYLES = {
   },
   FINAL_RESULT: {
     variant: "warning" as const,
+    className: undefined,
   },
   FAILED: {
     variant: "danger" as const,
+    className: undefined,
   },
 } as const;
 

@@ -9,7 +9,9 @@ describe("buildRankingEntries", () => {
         {
           id: "u1",
           name: "Ana",
+          username: null,
           email: "ana@example.com",
+          avatarUrl: null,
           predictions: [
             { points: 5, scoreType: "EXACT" },
             { points: 3, scoreType: "FINAL_RESULT" },
@@ -18,19 +20,25 @@ describe("buildRankingEntries", () => {
         {
           id: "u2",
           name: "Beto",
+          username: null,
           email: "beto@example.com",
+          avatarUrl: null,
           predictions: [{ points: 6, scoreType: "GOAL_DIFFERENCE" }],
         },
         {
           id: "u3",
           name: "Carla",
+          username: null,
           email: "carla@example.com",
+          avatarUrl: null,
           predictions: [{ points: 2, scoreType: "FINAL_RESULT" }],
         },
         {
           id: "u4",
           name: "Dani",
+          username: null,
           email: "dani@example.com",
+          avatarUrl: null,
           predictions: [{ points: 1, scoreType: "FAILED" }],
         },
       ],
@@ -50,13 +58,17 @@ describe("buildRankingEntries", () => {
         {
           id: "u1",
           name: "Ana",
+          username: null,
           email: "ana@example.com",
+          avatarUrl: null,
           predictions: [{ points: 5, scoreType: "EXACT" }],
         },
         {
           id: "u2",
           name: "Beto",
+          username: null,
           email: "beto@example.com",
+          avatarUrl: null,
           predictions: [{ points: 3, scoreType: "FINAL_RESULT" }],
         },
       ],
