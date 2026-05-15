@@ -5,11 +5,26 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import type { PredictionActionState } from "@/lib/prediction-action-state";
 import { calculatePredictionScore, getPendingPredictionScore } from "@/lib/scoring";
 import { formDataToObject, predictionSchema } from "@/lib/validations";
 import { isMatchEditable } from "@/lib/utils";
 
-export async function savePredictionAction(formData: FormData) {
+function buildPredictionActionState(
+  type: Exclude<PredictionActionState["type"], "idle">,
+  message: string,
+): PredictionActionState {
+  return {
+    type,
+    message,
+    submittedAt: Date.now(),
+  };
+}
+
+export async function savePredictionAction(
+  _previousState: PredictionActionState,
+  formData: FormData,
+): Promise<PredictionActionState> {
   const session = await auth();
 
   if (!session?.user) {
@@ -20,7 +35,10 @@ export async function savePredictionAction(formData: FormData) {
   const parsed = predictionSchema.safeParse(formDataToObject(formData));
 
   if (!parsed.success) {
-    redirect(`/jornadas/${roundId}?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Predicción inválida.")}`);
+    return buildPredictionActionState(
+      "error",
+      parsed.error.issues[0]?.message ?? "Predicción inválida.",
+    );
   }
 
   const match = await prisma.match.findUnique({
@@ -31,11 +49,11 @@ export async function savePredictionAction(formData: FormData) {
   });
 
   if (!match) {
-    redirect(`/jornadas/${roundId}?error=No se encontró el partido.`);
+    return buildPredictionActionState("error", "No se encontró el partido.");
   }
 
   if (!isMatchEditable(match.startsAt, match.isLocked, match.round.unlockAt)) {
-    redirect(`/jornadas/${roundId}?error=La fase o el partido ya no admiten cambios.`);
+    return buildPredictionActionState("error", "La fase o el partido ya no admiten cambios.");
   }
 
   const scored =
@@ -75,5 +93,5 @@ export async function savePredictionAction(formData: FormData) {
   revalidatePath("/jornadas");
   revalidatePath(`/jornadas/${roundId}`);
   revalidatePath("/clasificacion");
-  redirect(`/jornadas/${roundId}?success=Predicción guardada.`);
+  return buildPredictionActionState("success", "Predicción guardada.");
 }

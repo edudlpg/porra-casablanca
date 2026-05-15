@@ -1,11 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 import { LocalizedDateTime } from "@/components/layout/localized-date-time";
 import { Badge } from "@/components/ui/badge";
 import { SubmitButton } from "@/components/layout/submit-button";
 import { ScoreStepper } from "@/components/ui/score-stepper";
+import {
+  initialPredictionActionState,
+  type PredictionActionState,
+} from "@/lib/prediction-action-state";
 import { cn } from "@/lib/utils";
 import { isMatchEditable, isRoundOpen } from "@/lib/utils";
 import type { MatchWithRelations } from "@/types";
@@ -37,7 +43,10 @@ const SCORE_TYPE_STYLES = {
 } as const;
 
 type PredictionFormProps = {
-  action: (formData: FormData) => void;
+  action: (
+    previousState: PredictionActionState,
+    formData: FormData,
+  ) => Promise<PredictionActionState>;
   match: MatchWithRelations;
   roundId: string;
   currentPrediction?: {
@@ -54,6 +63,8 @@ export function PredictionForm({
   roundId,
   currentPrediction,
 }: PredictionFormProps) {
+  const router = useRouter();
+  const [state, formAction] = useActionState(action, initialPredictionActionState);
   const editable = isMatchEditable(match.startsAt, match.isLocked, match.round.unlockAt);
   const roundOpen = isRoundOpen(match.round.unlockAt);
   const hasResult = match.homeScore !== null && match.awayScore !== null;
@@ -73,6 +84,12 @@ export function PredictionForm({
       : null;
   const showPastPredictionSummary = !editable;
 
+  useEffect(() => {
+    if (state.type === "success") {
+      router.refresh();
+    }
+  }, [router, state.submittedAt, state.type]);
+
   if (!editable && !currentPrediction && !roundOpen) {
     return (
       <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-500">
@@ -82,9 +99,30 @@ export function PredictionForm({
   }
 
   return (
-    <form action={action} className="space-y-4">
+    <form action={formAction} className="space-y-4">
       <input type="hidden" name="matchId" value={match.id} />
       <input type="hidden" name="roundId" value={roundId} />
+
+      {state.type !== "idle" ? (
+        <div
+          key={state.submittedAt}
+          className={cn(
+            "prediction-feedback-toast pointer-events-none fixed left-1/2 top-4 z-50 flex w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-bold shadow-[0_18px_50px_-24px_rgba(15,23,42,0.45)] backdrop-blur-md",
+            state.type === "success"
+              ? "border-emerald-200 bg-emerald-50/95 text-emerald-800"
+              : "border-rose-200 bg-rose-50/95 text-rose-800",
+          )}
+          role="status"
+          aria-live="polite"
+        >
+          {state.type === "success" ? (
+            <CheckCircle2 className="size-4 shrink-0" />
+          ) : (
+            <AlertCircle className="size-4 shrink-0" />
+          )}
+          <span>{state.message}</span>
+        </div>
+      ) : null}
 
       {showPastPredictionSummary ? (
         <div className="py-1 text-center">
