@@ -8,8 +8,8 @@ export default function WorldCupPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Mundial"
-        title="Mundial"
-        description="Consulta la clasificación de grupos y, más adelante, la guía completa de selecciones."
+        title="Mundial 2026"
+        description="Consulta la clasificación de grupos e información sobre los equipos"
       />
 
       <div className="space-y-3">

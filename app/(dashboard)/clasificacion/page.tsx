@@ -8,6 +8,9 @@ import type { RankingEntry } from "@/types";
 export default async function RankingPage() {
   const [users, config] = await Promise.all([
     prisma.user.findMany({
+      where: {
+        role: "USER",
+      },
       include: {
         predictions: true,
       },

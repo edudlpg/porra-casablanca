@@ -10,6 +10,14 @@ import { buildRankingEntries } from "@/lib/ranking";
 import { prisma } from "@/lib/prisma";
 import type { RankingEntry } from "@/types";
 
+function formatPotAmount(amount: number) {
+  return new Intl.NumberFormat("es-ES", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
 export default async function HomePage() {
   const session = await auth();
   const now = new Date();
@@ -65,6 +73,9 @@ export default async function HomePage() {
       take: 3,
     }),
     prisma.user.findMany({
+      where: {
+        role: "USER",
+      },
       include: {
         predictions: true,
       },
@@ -80,6 +91,7 @@ export default async function HomePage() {
   const rankingEntries: RankingEntry[] = buildRankingEntries(users, config?.entryFee ?? 0);
 
   const currentUserEntry = rankingEntries.find((entry) => entry.user.id === session.user.id);
+  const accumulatedPot = rankingEntries.length * (config?.entryFee ?? 0);
 
   return (
     <div className="space-y-6">
@@ -119,6 +131,22 @@ export default async function HomePage() {
           </Card>
         </Link>
       </section>
+
+      <Card className="border-amber-200/80 bg-[linear-gradient(135deg,rgba(254,243,199,0.95),rgba(240,253,250,0.9))] text-slate-950">
+        <CardContent className="flex items-center justify-between gap-4 px-5 py-3">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-700">
+              Bote acumulado
+            </p>
+            <p className="mt-0.5 text-xs font-semibold text-slate-600">
+              {rankingEntries.length} participantes
+            </p>
+          </div>
+          <p className="font-display text-2xl font-bold text-amber-700">
+            {formatPotAmount(accumulatedPot)}
+          </p>
+        </CardContent>
+      </Card>
 
       <Card className="bg-[linear-gradient(135deg,rgba(3,105,161,0.94),rgba(15,118,110,0.96))] text-white">
         <CardContent className="space-y-4 p-5">
