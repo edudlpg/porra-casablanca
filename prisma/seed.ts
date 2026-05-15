@@ -30,12 +30,14 @@ async function main() {
     update: {
       name: "Admin",
       username: "admin",
+      teamName: "admin",
       passwordHash: adminPasswordHash,
       role: Role.ADMIN,
     },
     create: {
       name: "Admin",
       username: "admin",
+      teamName: "admin",
       email: "admin@porra.local",
       passwordHash: adminPasswordHash,
       role: Role.ADMIN,
@@ -47,12 +49,14 @@ async function main() {
     update: {
       name: "Maria",
       username: "maria",
+      teamName: "maria",
       passwordHash: userPasswordHash,
       role: Role.USER,
     },
     create: {
       name: "Maria",
       username: "maria",
+      teamName: "maria",
       email: "maria@porra.local",
       passwordHash: userPasswordHash,
       role: Role.USER,

@@ -9,40 +9,40 @@ const ADMIN_LINKS: Array<{
   title: string;
   description: string;
 }> = [
-  {
-    href: "/admin/jornadas",
-    title: "🗓️ Jornadas",
-    description: "Apertura, inicio y cierre de cada fase.",
-  },
-  {
-    href: "/admin/partidos",
-    title: "⚽ Partidos",
-    description: "Equipos, horarios y sedes de los encuentros.",
-  },
-  {
-    href: "/admin/resultados",
-    title: "🏁 Resultados",
-    description: "Marcadores finales y recálculo de puntos.",
-  },
-  {
-    href: "/admin/contrasenas",
-    title: "🔐 Contraseñas",
-    description: "Reasigna claves cuando alguien pierda la suya.",
-  },
-  {
-    href: "/admin/ajustes",
-    title: "⚙️ Ajustes",
-    description: "Configuración general de la porra y del bote.",
-  },
-];
+    {
+      href: "/admin/jornadas",
+      title: "🗓️ Jornadas",
+      description: "Apertura, inicio y cierre de cada fase",
+    },
+    {
+      href: "/admin/partidos",
+      title: "⚽ Partidos",
+      description: "Equipos, horarios y sedes de los encuentros",
+    },
+    {
+      href: "/admin/resultados",
+      title: "🏁 Resultados",
+      description: "Marcadores finales y recálculo de puntos",
+    },
+    {
+      href: "/admin/contrasenas",
+      title: "🔐 Contraseñas",
+      description: "Reasigna claves cuando alguien pierda la suya",
+    },
+    {
+      href: "/admin/ajustes",
+      title: "⚙️ Ajustes",
+      description: "Configuración general de la porra y del bote",
+    },
+  ];
 
 export default function AdminHomePage() {
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Admin"
-        title="🛠️ Panel de control"
-        description="Entra en cada sección para gestionar la porra sin mezclar tareas."
+        title="Panel de control"
+        description="Entra en cada sección para gestionar la porra sin mezclar tareas"
       />
 
       <div className="space-y-4">

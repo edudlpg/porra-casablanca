@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { formDataToObject, profileTeamNameSchema } from "@/lib/validations";
 
 const MAX_AVATAR_SIZE = 1024 * 1024;
 const ALLOWED_AVATAR_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -47,4 +48,29 @@ export async function saveProfileAvatarAction(formData: FormData) {
   revalidatePath("/perfil");
   revalidatePath("/clasificacion");
   redirect("/perfil?success=Foto actualizada.");
+}
+
+export async function saveProfileTeamNameAction(formData: FormData) {
+  const session = await auth();
+
+  if (!session?.user) {
+    redirect("/login");
+  }
+
+  const parsed = profileTeamNameSchema.safeParse(formDataToObject(formData));
+
+  if (!parsed.success) {
+    redirect(`/perfil?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Datos inválidos.")}`);
+  }
+
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: {
+      teamName: parsed.data.teamName,
+    },
+  });
+
+  revalidatePath("/perfil");
+  revalidatePath("/clasificacion");
+  redirect("/perfil?success=Nombre de equipo actualizado.");
 }

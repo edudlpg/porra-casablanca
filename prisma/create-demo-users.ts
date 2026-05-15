@@ -9,6 +9,7 @@ const DEMO_USERS = Array.from({ length: 10 }, (_, index) => {
   return {
     name: `Usuario ${userNumber}`,
     username: `demo${userNumber}`,
+    teamName: `demo${userNumber}`,
     email: `demo${userNumber}@porra.local`,
   };
 });
@@ -22,6 +23,7 @@ async function main() {
       update: {
         name: user.name,
         username: user.username,
+        teamName: user.teamName,
         passwordHash,
         role: Role.USER,
       },

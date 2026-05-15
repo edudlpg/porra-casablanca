@@ -44,6 +44,7 @@ model User {
   name         String
   username     String?      @unique
   email        String?      @unique
+  teamName     String?
   avatarUrl    String?
   passwordHash String
   role         Role         @default(USER)

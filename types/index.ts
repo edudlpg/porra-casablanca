@@ -12,7 +12,7 @@ export type MatchWithRelations = Match & {
 
 export type RankingEntry = {
   position: number;
-  user: Pick<User, "id" | "name" | "username" | "email" | "avatarUrl">;
+  user: Pick<User, "id" | "name" | "username" | "email" | "teamName" | "avatarUrl">;
   totalPoints: number;
   exactHits: number;
   goalDifferenceHits: number;

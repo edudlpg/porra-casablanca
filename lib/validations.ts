@@ -27,6 +27,16 @@ const passwordField = z
 
 const nameField = z.string().trim().min(2, "El nombre es obligatorio.").max(80, "El nombre es demasiado largo.");
 
+const teamNameField = z
+  .string()
+  .trim()
+  .min(2, "El nombre de equipo debe tener al menos 2 caracteres.")
+  .max(40, "El nombre de equipo no puede superar los 40 caracteres.")
+  .regex(
+    /^[\p{L}\p{N} ._-]+$/u,
+    "El nombre de equipo solo puede contener letras, números, espacios, puntos, guiones y guiones bajos.",
+  );
+
 const shortTextField = z.string().trim().max(100, "El texto es demasiado largo.").optional().or(z.literal(""));
 
 const secureUrlField = z
@@ -70,6 +80,10 @@ export const appConfigSchema = z.object({
     .int("La participación debe ser un número entero.")
     .min(0, "La participación no puede ser negativa.")
     .max(100000, "La participación es demasiado alta."),
+});
+
+export const profileTeamNameSchema = z.object({
+  teamName: teamNameField,
 });
 
 export const adminPasswordResetSchema = z.object({

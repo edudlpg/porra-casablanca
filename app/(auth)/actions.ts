@@ -92,6 +92,7 @@ export async function registerAction(formData: FormData) {
     data: {
       name: parsed.data.username,
       username: parsed.data.username,
+      teamName: parsed.data.username,
       email: null,
       passwordHash,
     },

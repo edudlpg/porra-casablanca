@@ -26,7 +26,7 @@ export default async function RankingPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Clasificación"
-        title="Clasificación"
+        title="Clasificación general"
       />
 
       {entries.length ? (

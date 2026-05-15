@@ -56,6 +56,7 @@ export function RankingList({ entries }: RankingListProps) {
     <div className="space-y-3">
       {entries.map((entry) => {
         const styles = getPositionStyles(entry.position);
+        const displayName = entry.user.teamName ?? entry.user.username ?? entry.user.name;
 
         return (
           <Card key={entry.user.id} className={cn("relative overflow-hidden", styles.cardClass)}>
@@ -75,15 +76,15 @@ export function RankingList({ entries }: RankingListProps) {
                     {entry.user.avatarUrl ? (
                       <AvatarImage
                         src={entry.user.avatarUrl}
-                        alt={`Foto de ${entry.user.username ?? entry.user.name}`}
+                        alt={`Foto de ${displayName}`}
                       />
                     ) : null}
-                    <AvatarFallback>{entry.user.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                    <AvatarFallback>{displayName.slice(0, 2).toUpperCase()}</AvatarFallback>
                   </Avatar>
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-slate-950">
-                    {entry.user.username ?? entry.user.name}
+                    {displayName}
                   </p>
                   <p className="mt-1 text-xs uppercase tracking-[0.14em] text-slate-500">
                     P {entry.exactHits} · D {entry.goalDifferenceHits} · S {entry.finalResultHits}

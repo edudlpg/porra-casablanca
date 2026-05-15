@@ -2,7 +2,7 @@ import type { Prediction, User } from "@prisma/client";
 
 import type { RankingEntry } from "@/types";
 
-type UserWithPredictions = Pick<User, "id" | "name" | "username" | "email" | "avatarUrl"> & {
+type UserWithPredictions = Pick<User, "id" | "name" | "username" | "email" | "teamName" | "avatarUrl"> & {
   predictions: Pick<Prediction, "points" | "scoreType">[];
 };
 
@@ -34,6 +34,7 @@ export function buildRankingEntries(users: UserWithPredictions[], entryFee = 0):
         name: user.name,
         username: user.username,
         email: user.email,
+        teamName: user.teamName,
         avatarUrl: user.avatarUrl,
       },
       totalPoints: user.predictions.reduce((sum, item) => sum + item.points, 0),
@@ -51,7 +52,9 @@ export function buildRankingEntries(users: UserWithPredictions[], entryFee = 0):
         right.exactHits - left.exactHits ||
         right.goalDifferenceHits - left.goalDifferenceHits ||
         right.finalResultHits - left.finalResultHits ||
-        left.user.name.localeCompare(right.user.name)
+        (left.user.teamName ?? left.user.username ?? left.user.name).localeCompare(
+          right.user.teamName ?? right.user.username ?? right.user.name,
+        )
       );
     })
     .map((entry, index, entries) => ({
