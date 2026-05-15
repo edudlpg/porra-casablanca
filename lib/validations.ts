@@ -91,6 +91,10 @@ export const adminPasswordResetSchema = z.object({
   password: passwordField,
 });
 
+export const adminUserDeleteSchema = z.object({
+  userId: z.string().cuid("El usuario es obligatorio."),
+});
+
 export const teamSchema = z.object({
   id: z.string().cuid().optional(),
   name: nameField,

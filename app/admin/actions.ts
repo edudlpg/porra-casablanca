@@ -11,6 +11,7 @@ import { calculatePredictionScore } from "@/lib/scoring";
 import { synchronizeTournamentProgression } from "@/lib/tournament-progression";
 import {
   adminPasswordResetSchema,
+  adminUserDeleteSchema,
   appConfigSchema,
   formDataToObject,
   matchSchema,
@@ -37,6 +38,7 @@ function refreshAdminScreens() {
   revalidatePath("/admin");
   revalidatePath("/admin/ajustes");
   revalidatePath("/admin/contrasenas");
+  revalidatePath("/admin/predicciones");
   revalidatePath("/home");
   revalidatePath("/jornadas");
   revalidatePath("/clasificacion");
@@ -91,6 +93,38 @@ export async function resetUserPasswordAction(formData: FormData) {
 
   refreshAdminScreens();
   redirect("/admin/contrasenas?success=Contraseña actualizada.");
+}
+
+export async function deleteUserAction(formData: FormData) {
+  await requireAdmin();
+
+  const parsed = adminUserDeleteSchema.safeParse(formDataToObject(formData));
+
+  if (!parsed.success) {
+    redirect(`/admin/contrasenas?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Usuario inválido.")}`);
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: parsed.data.userId },
+    select: {
+      role: true,
+    },
+  });
+
+  if (!user) {
+    redirect("/admin/contrasenas?error=No se encontró el usuario.");
+  }
+
+  if (user.role === Role.ADMIN) {
+    redirect("/admin/contrasenas?error=No se puede eliminar un administrador.");
+  }
+
+  await prisma.user.delete({
+    where: { id: parsed.data.userId },
+  });
+
+  refreshAdminScreens();
+  redirect("/admin/contrasenas?success=Usuario eliminado.");
 }
 
 export async function saveRoundAction(formData: FormData) {

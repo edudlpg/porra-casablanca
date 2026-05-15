@@ -106,21 +106,25 @@ export function PredictionForm({
       {state.type !== "idle" ? (
         <div
           key={state.submittedAt}
-          className={cn(
-            "prediction-feedback-toast pointer-events-none fixed left-1/2 top-4 z-50 flex w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-bold shadow-[0_18px_50px_-24px_rgba(15,23,42,0.45)] backdrop-blur-md",
-            state.type === "success"
-              ? "border-emerald-200 bg-emerald-50/95 text-emerald-800"
-              : "border-rose-200 bg-rose-50/95 text-rose-800",
-          )}
-          role="status"
-          aria-live="polite"
+          className="pointer-events-none fixed inset-x-0 top-4 z-50 flex justify-center px-4"
         >
-          {state.type === "success" ? (
-            <CheckCircle2 className="size-4 shrink-0" />
-          ) : (
-            <AlertCircle className="size-4 shrink-0" />
-          )}
-          <span>{state.message}</span>
+          <div
+            className={cn(
+              "prediction-feedback-toast flex w-full max-w-sm items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-bold shadow-[0_18px_50px_-24px_rgba(15,23,42,0.45)] backdrop-blur-md",
+              state.type === "success"
+                ? "border-emerald-200 bg-emerald-50/95 text-emerald-800"
+                : "border-rose-200 bg-rose-50/95 text-rose-800",
+            )}
+            role="status"
+            aria-live="polite"
+          >
+            {state.type === "success" ? (
+              <CheckCircle2 className="size-4 shrink-0" />
+            ) : (
+              <AlertCircle className="size-4 shrink-0" />
+            )}
+            <span>{state.message}</span>
+          </div>
         </div>
       ) : null}
 

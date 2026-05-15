@@ -25,9 +25,14 @@ const ADMIN_LINKS: Array<{
       description: "Marcadores finales y recálculo de puntos",
     },
     {
+      href: "/admin/predicciones",
+      title: "📊 Predicciones",
+      description: "Progreso de porras guardadas por usuario",
+    },
+    {
       href: "/admin/contrasenas",
-      title: "🔐 Contraseñas",
-      description: "Reasigna claves cuando alguien pierda la suya",
+      title: "👤 Usuarios",
+      description: "Gestiona usuarios, contraseñas y bajas",
     },
     {
       href: "/admin/ajustes",
