@@ -17,6 +17,7 @@ function getPlaceholderTeams() {
   ).map((name) => ({
     name,
     flagUrl: null,
+    groupCode: null,
   }));
 }
 
@@ -95,6 +96,9 @@ async function main() {
       roundId: roundByName.get(fixture.roundName)!,
       homeTeamId: teamByName.get(fixture.homeTeam)!,
       awayTeamId: teamByName.get(fixture.awayTeam)!,
+      homeSlotLabel: fixture.homeTeam,
+      awaySlotLabel: fixture.awayTeam,
+      winnerTeamId: null,
       startsAt: fixture.startsAt,
       homeScore: null,
       awayScore: null,

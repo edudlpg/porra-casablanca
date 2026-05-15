@@ -101,6 +101,7 @@ export const resultSchema = z.object({
   matchId: z.string().cuid("El partido es obligatorio."),
   homeScore: scoreField,
   awayScore: scoreField,
+  winnerTeamId: z.string().cuid().optional().or(z.literal("")).transform((value) => value || null),
   broadcast: broadcastField,
   isLocked: z
     .union([z.literal("on"), z.literal("true"), z.literal("false"), z.undefined()])

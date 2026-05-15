@@ -10,6 +10,17 @@ type ResultFormProps = {
 };
 
 export function ResultForm({ action, match }: ResultFormProps) {
+  const isKnockoutMatch = match.round.name !== "Fase de grupos";
+  const defaultWinnerTeamId =
+    match.winnerTeamId ??
+    (match.homeScore !== null && match.awayScore !== null
+      ? match.homeScore > match.awayScore
+        ? match.homeTeamId
+        : match.homeScore < match.awayScore
+          ? match.awayTeamId
+          : null
+      : null);
+
   return (
     <form action={action} className="space-y-4">
       <input type="hidden" name="matchId" value={match.id} />
@@ -51,6 +62,39 @@ export function ResultForm({ action, match }: ResultFormProps) {
         idPrefix={`result-broadcast-${match.id}`}
         defaultValue={match.broadcast}
       />
+
+      {isKnockoutMatch ? (
+        <fieldset className="space-y-3 rounded-2xl bg-slate-50 px-4 py-4">
+          <div>
+            <p className="text-sm font-semibold text-slate-900">Equipo que avanza</p>
+            <p className="text-xs text-slate-500">
+              Si el marcador acaba en empate, marca aquí quién pasa de ronda.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700">
+              <input
+                type="radio"
+                name="winnerTeamId"
+                value={match.homeTeamId}
+                defaultChecked={defaultWinnerTeamId === match.homeTeamId}
+                className="size-4 border-slate-300"
+              />
+              <span className="font-medium text-slate-900">{match.homeTeam.name}</span>
+            </label>
+            <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700">
+              <input
+                type="radio"
+                name="winnerTeamId"
+                value={match.awayTeamId}
+                defaultChecked={defaultWinnerTeamId === match.awayTeamId}
+                className="size-4 border-slate-300"
+              />
+              <span className="font-medium text-slate-900">{match.awayTeam.name}</span>
+            </label>
+          </div>
+        </fieldset>
+      ) : null}
 
       <label className="flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-700">
         <input

@@ -3,7 +3,7 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, CalendarDays, Home, ShieldCheck, UserCircle2 } from "lucide-react";
+import { BarChart3, CalendarDays, Globe2, Home, ShieldCheck, UserCircle2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -16,6 +16,7 @@ type NavItem = {
 const USER_ITEMS = [
   { href: "/home", label: "Home", icon: Home },
   { href: "/jornadas", label: "Jornadas", icon: CalendarDays },
+  { href: "/mundial", label: "Mundial", icon: Globe2 },
   { href: "/clasificacion", label: "Clasificación", icon: BarChart3 },
   { href: "/perfil", label: "Perfil", icon: UserCircle2 },
 ] satisfies NavItem[];

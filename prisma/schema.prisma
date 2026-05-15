@@ -24,6 +24,21 @@ enum BroadcastPartner {
   RTVE
 }
 
+enum GroupCode {
+  A
+  B
+  C
+  D
+  E
+  F
+  G
+  H
+  I
+  J
+  K
+  L
+}
+
 model User {
   id           String       @id @default(cuid())
   name         String
@@ -71,8 +86,10 @@ model Team {
   id             String  @id @default(cuid())
   name           String  @unique
   flagUrl        String?
+  groupCode      GroupCode?
   homeMatches    Match[] @relation("HomeTeamMatches")
   awayMatches    Match[] @relation("AwayTeamMatches")
+  winnerMatches  Match[] @relation("WinnerTeamMatches")
 }
 
 model Match {
@@ -80,6 +97,9 @@ model Match {
   roundId     String
   homeTeamId  String
   awayTeamId  String
+  winnerTeamId String?
+  homeSlotLabel String?
+  awaySlotLabel String?
   venueName   String?
   venueCity   String?
   startsAt    DateTime
@@ -91,9 +111,11 @@ model Match {
   round       Round        @relation(fields: [roundId], references: [id], onDelete: Cascade)
   homeTeam    Team         @relation("HomeTeamMatches", fields: [homeTeamId], references: [id], onDelete: Restrict)
   awayTeam    Team         @relation("AwayTeamMatches", fields: [awayTeamId], references: [id], onDelete: Restrict)
+  winnerTeam  Team?        @relation("WinnerTeamMatches", fields: [winnerTeamId], references: [id], onDelete: SetNull)
   predictions Prediction[]
 
   @@index([roundId, startsAt])
+  @@index([winnerTeamId])
 }
 
 model Prediction {

@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculatePredictionScore } from "@/lib/scoring";
+import { synchronizeTournamentProgression } from "@/lib/tournament-progression";
 import {
   adminPasswordResetSchema,
   appConfigSchema,
@@ -39,6 +40,8 @@ function refreshAdminScreens() {
   revalidatePath("/home");
   revalidatePath("/jornadas");
   revalidatePath("/clasificacion");
+  revalidatePath("/mundial");
+  revalidatePath("/mundial/clasificacion-grupos");
   revalidatePath("/admin/jornadas");
   revalidatePath("/admin/partidos");
   revalidatePath("/admin/resultados");
@@ -177,40 +180,83 @@ export async function saveResultAction(formData: FormData) {
     redirect(`/admin/resultados?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Resultado inválido.")}`);
   }
 
-  await prisma.match.update({
-    where: { id: parsed.data.matchId },
-    data: {
-      homeScore: parsed.data.homeScore,
-      awayScore: parsed.data.awayScore,
-      broadcast: parsed.data.broadcast,
-      isLocked: parsed.data.isLocked,
+  const currentMatch = await prisma.match.findUnique({
+    where: {
+      id: parsed.data.matchId,
+    },
+    include: {
+      round: true,
     },
   });
 
-  const predictions = await prisma.prediction.findMany({
-    where: {
-      matchId: parsed.data.matchId,
-    },
-  });
+  if (!currentMatch) {
+    redirect("/admin/resultados?error=No se encontró el partido.");
+  }
+
+  const isKnockoutMatch = currentMatch.round.name !== "Fase de grupos";
+  const isDraw = parsed.data.homeScore === parsed.data.awayScore;
+
+  if (
+    parsed.data.winnerTeamId &&
+    parsed.data.winnerTeamId !== currentMatch.homeTeamId &&
+    parsed.data.winnerTeamId !== currentMatch.awayTeamId
+  ) {
+    redirect("/admin/resultados?error=El equipo que avanza no coincide con los participantes del partido.");
+  }
+
+  if (isKnockoutMatch && isDraw && !parsed.data.winnerTeamId) {
+    redirect("/admin/resultados?error=En eliminatorias, si hay empate debes indicar qué equipo pasa de ronda.");
+  }
+
+  const winnerTeamId = isKnockoutMatch
+    ? parsed.data.homeScore > parsed.data.awayScore
+      ? currentMatch.homeTeamId
+      : parsed.data.homeScore < parsed.data.awayScore
+        ? currentMatch.awayTeamId
+        : parsed.data.winnerTeamId
+    : null;
 
   await prisma.$transaction(
-    predictions.map((prediction) => {
-      const scored = calculatePredictionScore(
-        prediction.predictedHomeScore,
-        prediction.predictedAwayScore,
-        parsed.data.homeScore,
-        parsed.data.awayScore,
+    async (tx) => {
+      await tx.match.update({
+        where: { id: parsed.data.matchId },
+        data: {
+          homeScore: parsed.data.homeScore,
+          awayScore: parsed.data.awayScore,
+          winnerTeamId,
+          broadcast: parsed.data.broadcast,
+          isLocked: parsed.data.isLocked,
+        },
+      });
+
+      const predictions = await tx.prediction.findMany({
+        where: {
+          matchId: parsed.data.matchId,
+        },
+      });
+
+      await Promise.all(
+        predictions.map((prediction) => {
+          const scored = calculatePredictionScore(
+            prediction.predictedHomeScore,
+            prediction.predictedAwayScore,
+            parsed.data.homeScore,
+            parsed.data.awayScore,
+          );
+
+          return tx.prediction.update({
+            where: { id: prediction.id },
+            data: scored,
+          });
+        }),
       );
 
-      return prisma.prediction.update({
-        where: { id: prediction.id },
-        data: scored,
-      });
-    }),
+      await synchronizeTournamentProgression(tx);
+    },
   );
 
   refreshAdminScreens();
-  redirect("/admin/resultados?success=Resultado guardado y puntuaciones actualizadas.");
+  redirect("/admin/resultados?success=Resultado guardado, puntuaciones actualizadas y cruces sincronizados.");
 }
 
 export async function recalculateScoresAction() {
