@@ -1,11 +1,12 @@
 import Link from "next/link";
 
 import { EmptyState } from "@/components/layout/empty-state";
+import { LocalizedDateTime } from "@/components/layout/localized-date-time";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
-import { formatDateTime, isMatchEditable, isRoundOpen } from "@/lib/utils";
+import { isMatchEditable, isRoundOpen } from "@/lib/utils";
 
 export default async function RoundsPage() {
   const rounds = await prisma.round.findMany({
@@ -46,11 +47,11 @@ export default async function RoundsPage() {
                       <div>
                         <h2 className="font-display text-xl font-bold text-slate-950">{round.name}</h2>
                         <p className="mt-1 text-sm text-slate-500">
-                          {formatDateTime(round.startDate)} - {formatDateTime(round.endDate)}
+                          <LocalizedDateTime value={round.startDate} /> - <LocalizedDateTime value={round.endDate} />
                         </p>
                         {!roundOpen ? (
                           <p className="mt-2 text-sm font-medium text-amber-700">
-                            Se abrirá el {formatDateTime(round.unlockAt)}
+                            Se abrirá el <LocalizedDateTime value={round.unlockAt} />
                           </p>
                         ) : null}
                       </div>

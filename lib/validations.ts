@@ -17,13 +17,32 @@ const usernameField = z
   .string()
   .trim()
   .min(2, "El usuario debe tener al menos 2 caracteres.")
-  .max(30, "El usuario no puede superar los 30 caracteres.");
+  .max(30, "El usuario no puede superar los 30 caracteres.")
+  .regex(/^[\p{L}\p{N}._-]+$/u, "El usuario solo puede contener letras, números, puntos, guiones y guiones bajos.");
+
+const passwordField = z
+  .string()
+  .min(6, "La contraseña debe tener al menos 6 caracteres.")
+  .max(100, "La contraseña no puede superar los 100 caracteres.");
+
+const nameField = z.string().trim().min(2, "El nombre es obligatorio.").max(80, "El nombre es demasiado largo.");
+
+const shortTextField = z.string().trim().max(100, "El texto es demasiado largo.").optional().or(z.literal(""));
+
+const secureUrlField = z
+  .string()
+  .trim()
+  .url("La URL debe ser válida.")
+  .max(500, "La URL es demasiado larga.")
+  .refine((value) => value.startsWith("https://") || value.startsWith("http://"), {
+    message: "La URL debe empezar por http:// o https://.",
+  });
 
 const broadcastField = z.enum(["DAZN", "RTVE"]).default("DAZN");
 
 export const loginSchema = z.object({
   username: usernameField,
-  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
+  password: passwordField,
 });
 
 export const registerSchema = loginSchema;
@@ -31,7 +50,7 @@ export const registerSchema = loginSchema;
 export const roundSchema = z
   .object({
     id: z.string().cuid().optional(),
-    name: z.string().trim().min(2, "El nombre de la jornada es obligatorio."),
+    name: nameField.max(60, "El nombre de la jornada no puede superar los 60 caracteres."),
     unlockAt: datetimeField,
     startDate: datetimeField,
     endDate: datetimeField,
@@ -55,18 +74,13 @@ export const appConfigSchema = z.object({
 
 export const adminPasswordResetSchema = z.object({
   userId: z.string().cuid("El usuario es obligatorio."),
-  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
+  password: passwordField,
 });
 
 export const teamSchema = z.object({
   id: z.string().cuid().optional(),
-  name: z.string().trim().min(2, "El nombre del equipo es obligatorio."),
-  flagUrl: z
-    .string()
-    .trim()
-    .url("La bandera debe ser una URL válida.")
-    .optional()
-    .or(z.literal("")),
+  name: nameField,
+  flagUrl: secureUrlField.optional().or(z.literal("")),
 });
 
 export const matchSchema = z.object({
@@ -74,8 +88,8 @@ export const matchSchema = z.object({
   roundId: z.string().cuid("La jornada es obligatoria."),
   homeTeamId: z.string().cuid("El equipo local es obligatorio."),
   awayTeamId: z.string().cuid("El equipo visitante es obligatorio."),
-  venueName: z.string().trim().optional().or(z.literal("")),
-  venueCity: z.string().trim().optional().or(z.literal("")),
+  venueName: shortTextField,
+  venueCity: shortTextField,
   startsAt: datetimeField,
   broadcast: broadcastField,
   isLocked: z

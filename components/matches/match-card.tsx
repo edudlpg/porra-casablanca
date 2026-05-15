@@ -2,6 +2,7 @@ import { Lock } from "lucide-react";
 
 import { CardCornerGraphic } from "@/components/ui/card-corner-graphic";
 import { BroadcastBadge } from "@/components/matches/broadcast-badge";
+import { LocalizedDateTime } from "@/components/layout/localized-date-time";
 import { TeamBadge } from "@/components/teams/team-badge";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -38,7 +39,7 @@ export function MatchCard({
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-              {formatDateTime(match.startsAt)}
+              <LocalizedDateTime value={match.startsAt} />
             </p>
             <p className="mt-1 text-sm text-slate-500">{subtitle ?? match.round.name}</p>
           </div>

@@ -6,7 +6,8 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
+const MAX_AVATAR_SIZE = 1024 * 1024;
+const ALLOWED_AVATAR_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 export async function saveProfileAvatarAction(formData: FormData) {
   const session = await auth();
@@ -25,8 +26,12 @@ export async function saveProfileAvatarAction(formData: FormData) {
     redirect("/perfil?error=La foto debe ser una imagen válida.");
   }
 
+  if (!ALLOWED_AVATAR_TYPES.has(avatar.type)) {
+    redirect("/perfil?error=La foto debe ser JPG, PNG o WEBP.");
+  }
+
   if (avatar.size > MAX_AVATAR_SIZE) {
-    redirect("/perfil?error=La foto no puede superar los 2 MB.");
+    redirect("/perfil?error=La foto debe pesar menos de 1 MB tras optimizarse.");
   }
 
   const buffer = Buffer.from(await avatar.arrayBuffer());

@@ -1,4 +1,5 @@
 import { FeedbackBanner } from "@/components/layout/feedback-banner";
+import { AvatarUploadForm } from "@/components/profile/avatar-upload-form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/layout/page-header";
@@ -63,26 +64,7 @@ export default async function ProfilePage({
             <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Usuario</p>
             <p className="text-sm font-semibold text-slate-950">{user.username ?? user.name}</p>
           </div>
-          <form action={saveProfileAvatarAction} className="space-y-3">
-            <div className="space-y-2">
-              <label
-                htmlFor="avatar"
-                className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500"
-              >
-                Foto de perfil
-              </label>
-              <input
-                id="avatar"
-                name="avatar"
-                type="file"
-                accept="image/*"
-                className="block w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 file:mr-3 file:rounded-xl file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-700"
-              />
-            </div>
-            <SubmitButton size="sm" pendingLabel="Subiendo...">
-              Guardar foto
-            </SubmitButton>
-          </form>
+          <AvatarUploadForm action={saveProfileAvatarAction} />
         </CardContent>
       </Card>
 

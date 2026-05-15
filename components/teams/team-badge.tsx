@@ -40,7 +40,13 @@ export function TeamBadge({ team, layout = "inline", className }: TeamBadgeProps
       )}
     >
       <Avatar className={avatarSizeClass}>
-        {displayFlagUrl ? <AvatarImage src={displayFlagUrl} alt={`Bandera de ${team.name}`} /> : null}
+        {displayFlagUrl ? (
+          <AvatarImage
+            src={displayFlagUrl}
+            alt={`Bandera de ${team.name}`}
+            className="object-contain bg-white p-0.5"
+          />
+        ) : null}
         <AvatarFallback
           className={cn(
             flagEmoji && [

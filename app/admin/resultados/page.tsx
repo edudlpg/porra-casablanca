@@ -1,12 +1,12 @@
 import { ResultForm } from "@/components/admin/result-form";
 import { BackLink } from "@/components/layout/back-link";
 import { FeedbackBanner } from "@/components/layout/feedback-banner";
+import { LocalizedDateTime } from "@/components/layout/localized-date-time";
 import { PageHeader } from "@/components/layout/page-header";
 import { SubmitButton } from "@/components/layout/submit-button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
-import { formatDateTime } from "@/lib/utils";
 import { recalculateScoresAction, saveResultAction } from "@/app/admin/actions";
 
 type SearchParams = Promise<{ error?: string; success?: string }>;
@@ -60,7 +60,7 @@ export default async function AdminResultsPage({
                     {match.homeTeam.name} vs {match.awayTeam.name}
                   </CardTitle>
                   <p className="mt-1 text-sm text-slate-500">
-                    {match.round.name} · {formatDateTime(match.startsAt)}
+                    {match.round.name} · <LocalizedDateTime value={match.startsAt} />
                   </p>
                 </div>
                 <Badge variant={match.homeScore !== null ? "success" : "secondary"}>

@@ -1,10 +1,10 @@
 import { FeedbackBanner } from "@/components/layout/feedback-banner";
 import { BackLink } from "@/components/layout/back-link";
+import { LocalizedDateTime } from "@/components/layout/localized-date-time";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
-import { formatDateTime } from "@/lib/utils";
 import { MatchForm } from "@/components/admin/match-form";
 import { saveMatchAction } from "@/app/admin/actions";
 
@@ -51,7 +51,7 @@ export default async function AdminMatchesPage({
                     {match.homeTeam.name} vs {match.awayTeam.name}
                   </CardTitle>
                   <p className="mt-1 text-sm text-slate-500">
-                    {match.round.name} · {formatDateTime(match.startsAt)}
+                    {match.round.name} · <LocalizedDateTime value={match.startsAt} />
                   </p>
                 </div>
                 <Badge variant={match.isLocked ? "warning" : "secondary"}>

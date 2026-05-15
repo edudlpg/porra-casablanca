@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 
+import { LocalizedDateTime } from "@/components/layout/localized-date-time";
 import { Badge } from "@/components/ui/badge";
 import { SubmitButton } from "@/components/layout/submit-button";
 import { ScoreStepper } from "@/components/ui/score-stepper";
 import { cn } from "@/lib/utils";
-import { formatDateTime, isMatchEditable, isRoundOpen } from "@/lib/utils";
+import { isMatchEditable, isRoundOpen } from "@/lib/utils";
 import type { MatchWithRelations } from "@/types";
 
 const SCORE_TYPE_LABELS = {
@@ -75,7 +76,7 @@ export function PredictionForm({
   if (!editable && !currentPrediction && !roundOpen) {
     return (
       <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-500">
-        {`Esta fase se abrirá el ${formatDateTime(match.round.unlockAt)}.`}
+        Esta fase se abrirá el <LocalizedDateTime value={match.round.unlockAt} />.
       </div>
     );
   }
