@@ -1,5 +1,11 @@
 import type { NextConfig } from "next";
 
+const scriptSrc = [
+  "'self'",
+  "'unsafe-inline'",
+  process.env.NODE_ENV !== "production" ? "'unsafe-eval'" : null,
+].filter(Boolean);
+
 const nextConfig: NextConfig = {
   typedRoutes: true,
   experimental: {
@@ -16,7 +22,7 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self'",
+              `script-src ${scriptSrc.join(" ")}`,
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://flagcdn.com",
               "font-src 'self' data:",
