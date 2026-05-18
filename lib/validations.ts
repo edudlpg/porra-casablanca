@@ -50,6 +50,8 @@ const secureUrlField = z
 
 const broadcastField = z.enum(["DAZN", "RTVE"]).default("DAZN");
 
+const checkboxField = z.preprocess((value) => value === "on" || value === "true", z.boolean());
+
 export const loginSchema = z.object({
   username: usernameField,
   password: passwordField,
@@ -110,20 +112,19 @@ export const matchSchema = z.object({
   venueCity: shortTextField,
   startsAt: datetimeField,
   broadcast: broadcastField,
-  isLocked: z
-    .union([z.literal("on"), z.literal("true"), z.literal("false"), z.undefined()])
-    .transform((value) => value === "on" || value === "true"),
+  isLocked: checkboxField,
 });
 
 export const resultSchema = z.object({
   matchId: z.string().cuid("El partido es obligatorio."),
   homeScore: scoreField,
   awayScore: scoreField,
-  winnerTeamId: z.string().cuid().optional().or(z.literal("")).transform((value) => value || null),
+  winnerTeamId: z.preprocess(
+    (value) => (value ? value : null),
+    z.string().cuid("El equipo que avanza no es válido.").nullable(),
+  ),
   broadcast: broadcastField,
-  isLocked: z
-    .union([z.literal("on"), z.literal("true"), z.literal("false"), z.undefined()])
-    .transform((value) => value === "on" || value === "true"),
+  isLocked: checkboxField,
 });
 
 export const predictionSchema = z.object({

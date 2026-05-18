@@ -13,7 +13,7 @@ import {
   type PredictionActionState,
 } from "@/lib/prediction-action-state";
 import { cn } from "@/lib/utils";
-import { isMatchEditable, isRoundOpen } from "@/lib/utils";
+import { isMatchEditable, isRoundInWindow } from "@/lib/utils";
 import type { MatchWithRelations } from "@/types";
 
 const SCORE_TYPE_LABELS = {
@@ -65,8 +65,8 @@ export function PredictionForm({
 }: PredictionFormProps) {
   const router = useRouter();
   const [state, formAction] = useActionState(action, initialPredictionActionState);
-  const editable = isMatchEditable(match.startsAt, match.isLocked, match.round.unlockAt);
-  const roundOpen = isRoundOpen(match.round.unlockAt);
+  const editable = isMatchEditable(match.startsAt, match.isLocked, match.round.unlockAt, match.round.endDate);
+  const roundOpen = isRoundInWindow(match.round.unlockAt, match.round.endDate);
   const hasResult = match.homeScore !== null && match.awayScore !== null;
   const [homeScore, setHomeScore] = useState(currentPrediction?.predictedHomeScore ?? 0);
   const [awayScore, setAwayScore] = useState(currentPrediction?.predictedAwayScore ?? 0);

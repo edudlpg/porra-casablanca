@@ -8,7 +8,7 @@ import { PredictionForm } from "@/components/predictions/prediction-form";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatMatchVenue } from "@/lib/venues";
-import { isMatchEditable } from "@/lib/utils";
+import { isRoundInWindow, isMatchEditable } from "@/lib/utils";
 import { savePredictionAction } from "@/app/(dashboard)/jornadas/actions";
 
 type Params = Promise<{ roundId: string }>;
@@ -54,6 +54,21 @@ export default async function RoundDetailPage({
     notFound();
   }
 
+  const currentRound = await prisma.round.findFirst({
+    where: {
+      unlockAt: {
+        lte: new Date(),
+      },
+      endDate: {
+        gte: new Date(),
+      },
+    },
+    orderBy: {
+      startDate: "asc",
+    },
+  });
+  const isCurrentRound = currentRound?.id === round.id && isRoundInWindow(round.unlockAt, round.endDate);
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -70,19 +85,20 @@ export default async function RoundDetailPage({
         {round.matches.map((match) => (
           <MatchCard
             key={match.id}
-            match={match}
+            match={isCurrentRound ? match : { ...match, isLocked: true }}
             hasSavedPrediction={Boolean(match.predictions[0])}
             subtitle={formatMatchVenue(match)}
             scoreLabel={
               match.predictions[0] &&
-              isMatchEditable(match.startsAt, match.isLocked, match.round.unlockAt)
+              isCurrentRound &&
+              isMatchEditable(match.startsAt, match.isLocked, match.round.unlockAt, match.round.endDate)
                 ? `Tu porra: ${match.predictions[0].predictedHomeScore}-${match.predictions[0].predictedAwayScore}`
                 : undefined
             }
           >
             <PredictionForm
               action={savePredictionAction}
-              match={match}
+              match={isCurrentRound ? match : { ...match, isLocked: true }}
               roundId={round.id}
               currentPrediction={match.predictions[0]}
             />

@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
-import { isMatchEditable, isRoundOpen } from "@/lib/utils";
+import { isMatchEditable, isRoundInWindow, isRoundOpen } from "@/lib/utils";
 
 export default async function RoundsPage() {
   const rounds = await prisma.round.findMany({
@@ -21,6 +21,7 @@ export default async function RoundsPage() {
       startDate: "asc",
     },
   });
+  const currentRound = rounds.find((round) => isRoundInWindow(round.unlockAt, round.endDate));
 
   return (
     <div className="space-y-6">
@@ -34,7 +35,8 @@ export default async function RoundsPage() {
         <div className="space-y-3">
           {rounds.map((round) => {
             const openMatches = round.matches.filter((match) =>
-              isMatchEditable(match.startsAt, match.isLocked, round.unlockAt),
+              currentRound?.id === round.id &&
+              isMatchEditable(match.startsAt, match.isLocked, round.unlockAt, round.endDate),
             ).length;
             const blockedMatches = round.matches.length - openMatches;
             const roundOpen = isRoundOpen(round.unlockAt);

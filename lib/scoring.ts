@@ -8,8 +8,8 @@ type ScoreResult = {
 };
 
 const POINTS_BY_SCORE_TYPE: Record<Exclude<ScoreType, "PENDING">, number> = {
-  EXACT: 5,
-  GOAL_DIFFERENCE: 3,
+  EXACT: 3,
+  GOAL_DIFFERENCE: 2,
   FINAL_RESULT: 1,
   FAILED: 0,
 };

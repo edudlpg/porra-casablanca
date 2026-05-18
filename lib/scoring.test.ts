@@ -3,30 +3,30 @@ import { describe, expect, it } from "vitest";
 import { calculatePredictionScore } from "@/lib/scoring";
 
 describe("calculatePredictionScore", () => {
-  it("devuelve EXACT y 5 puntos cuando el resultado coincide exactamente", () => {
+  it("devuelve EXACT y 3 puntos cuando el resultado coincide exactamente", () => {
     expect(calculatePredictionScore(2, 1, 2, 1)).toEqual({
-      points: 5,
+      points: 3,
       scoreType: "EXACT",
     });
   });
 
   it("prioriza EXACT por encima de diferencia y signo", () => {
     expect(calculatePredictionScore(0, 0, 0, 0)).toEqual({
-      points: 5,
+      points: 3,
       scoreType: "EXACT",
     });
   });
 
-  it("devuelve GOAL_DIFFERENCE y 3 puntos cuando coincide la diferencia", () => {
+  it("devuelve GOAL_DIFFERENCE y 2 puntos cuando coincide la diferencia", () => {
     expect(calculatePredictionScore(2, 0, 3, 1)).toEqual({
-      points: 3,
+      points: 2,
       scoreType: "GOAL_DIFFERENCE",
     });
   });
 
   it("aplica GOAL_DIFFERENCE también a empates con diferencia 0", () => {
     expect(calculatePredictionScore(1, 1, 0, 0)).toEqual({
-      points: 3,
+      points: 2,
       scoreType: "GOAL_DIFFERENCE",
     });
   });

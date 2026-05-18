@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import type { ResultActionState } from "@/lib/result-action-state";
 import { calculatePredictionScore } from "@/lib/scoring";
 import { synchronizeTournamentProgression } from "@/lib/tournament-progression";
 import {
@@ -32,6 +33,17 @@ async function requireAdmin() {
   }
 
   return session.user;
+}
+
+function buildResultActionState(
+  type: Exclude<ResultActionState["type"], "idle">,
+  message: string,
+): ResultActionState {
+  return {
+    type,
+    message,
+    submittedAt: Date.now(),
+  };
 }
 
 function refreshAdminScreens() {
@@ -205,13 +217,19 @@ export async function saveMatchAction(formData: FormData) {
   redirect("/admin/partidos?success=Partido guardado.");
 }
 
-export async function saveResultAction(formData: FormData) {
+export async function saveResultAction(
+  _previousState: ResultActionState,
+  formData: FormData,
+): Promise<ResultActionState> {
   await requireAdmin();
 
   const parsed = resultSchema.safeParse(formDataToObject(formData));
 
   if (!parsed.success) {
-    redirect(`/admin/resultados?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Resultado inválido.")}`);
+    return buildResultActionState(
+      "error",
+      parsed.error.issues[0]?.message ?? "Resultado inválido.",
+    );
   }
 
   const currentMatch = await prisma.match.findUnique({
@@ -224,7 +242,7 @@ export async function saveResultAction(formData: FormData) {
   });
 
   if (!currentMatch) {
-    redirect("/admin/resultados?error=No se encontró el partido.");
+    return buildResultActionState("error", "No se encontró el partido.");
   }
 
   const isKnockoutMatch = currentMatch.round.name !== "Fase de grupos";
@@ -235,11 +253,17 @@ export async function saveResultAction(formData: FormData) {
     parsed.data.winnerTeamId !== currentMatch.homeTeamId &&
     parsed.data.winnerTeamId !== currentMatch.awayTeamId
   ) {
-    redirect("/admin/resultados?error=El equipo que avanza no coincide con los participantes del partido.");
+    return buildResultActionState(
+      "error",
+      "El equipo que avanza no coincide con los participantes del partido.",
+    );
   }
 
   if (isKnockoutMatch && isDraw && !parsed.data.winnerTeamId) {
-    redirect("/admin/resultados?error=En eliminatorias, si hay empate debes indicar qué equipo pasa de ronda.");
+    return buildResultActionState(
+      "error",
+      "En eliminatorias, si hay empate debes indicar qué equipo pasa de ronda.",
+    );
   }
 
   const winnerTeamId = isKnockoutMatch
@@ -290,7 +314,10 @@ export async function saveResultAction(formData: FormData) {
   );
 
   refreshAdminScreens();
-  redirect("/admin/resultados?success=Resultado guardado, puntuaciones actualizadas y cruces sincronizados.");
+  return buildResultActionState(
+    "success",
+    "Resultado guardado, puntuaciones actualizadas y cruces sincronizados.",
+  );
 }
 
 export async function recalculateScoresAction() {

@@ -27,28 +27,16 @@ export default async function HomePage() {
     return null;
   }
 
-  const pendingMatchesWhere = {
-    startsAt: { gt: now },
-    isLocked: false,
-    round: {
-      unlockAt: {
-        lte: now,
-      },
-    },
-    predictions: {
-      none: {
-        userId: session.user.id,
-      },
-    },
-  } as const;
-
   const upcomingMatchesWhere = {
     startsAt: { gt: now },
   } as const;
 
-  const [nextRound, pendingMatchesCount, upcomingMatches, users, config] = await Promise.all([
+  const [nextRound, upcomingMatches, users, config] = await Promise.all([
     prisma.round.findFirst({
       where: {
+        unlockAt: {
+          lte: now,
+        },
         endDate: {
           gte: now,
         },
@@ -56,9 +44,6 @@ export default async function HomePage() {
       orderBy: {
         startDate: "asc",
       },
-    }),
-    prisma.match.count({
-      where: pendingMatchesWhere,
     }),
     prisma.match.findMany({
       where: upcomingMatchesWhere,
@@ -87,6 +72,21 @@ export default async function HomePage() {
       where: { id: "singleton" },
     }),
   ]);
+
+  const pendingMatchesCount = nextRound
+    ? await prisma.match.count({
+        where: {
+          roundId: nextRound.id,
+          startsAt: { gt: now },
+          isLocked: false,
+          predictions: {
+            none: {
+              userId: session.user.id,
+            },
+          },
+        },
+      })
+    : 0;
 
   const rankingEntries: RankingEntry[] = buildRankingEntries(users, config?.entryFee ?? 0);
 

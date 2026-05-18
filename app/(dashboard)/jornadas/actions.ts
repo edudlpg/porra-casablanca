@@ -52,7 +52,24 @@ export async function savePredictionAction(
     return buildPredictionActionState("error", "No se encontró el partido.");
   }
 
-  if (!isMatchEditable(match.startsAt, match.isLocked, match.round.unlockAt)) {
+  const currentRound = await prisma.round.findFirst({
+    where: {
+      unlockAt: {
+        lte: new Date(),
+      },
+      endDate: {
+        gte: new Date(),
+      },
+    },
+    orderBy: {
+      startDate: "asc",
+    },
+  });
+
+  if (
+    currentRound?.id !== match.roundId ||
+    !isMatchEditable(match.startsAt, match.isLocked, match.round.unlockAt, match.round.endDate)
+  ) {
     return buildPredictionActionState("error", "La fase o el partido ya no admiten cambios.");
   }
 

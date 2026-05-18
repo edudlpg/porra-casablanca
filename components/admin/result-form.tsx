@@ -1,15 +1,28 @@
+"use client";
+
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
+
 import { BroadcastSwitch } from "@/components/admin/broadcast-switch";
 import type { MatchWithRelations } from "@/types";
 import { SubmitButton } from "@/components/layout/submit-button";
 import { TeamBadge } from "@/components/teams/team-badge";
 import { ScoreStepper } from "@/components/ui/score-stepper";
+import { initialResultActionState, type ResultActionState } from "@/lib/result-action-state";
+import { cn } from "@/lib/utils";
 
 type ResultFormProps = {
-  action: (formData: FormData) => void;
+  action: (
+    previousState: ResultActionState,
+    formData: FormData,
+  ) => Promise<ResultActionState>;
   match: MatchWithRelations;
 };
 
 export function ResultForm({ action, match }: ResultFormProps) {
+  const router = useRouter();
+  const [state, formAction] = useActionState(action, initialResultActionState);
   const isKnockoutMatch = match.round.name !== "Fase de grupos";
   const defaultWinnerTeamId =
     match.winnerTeamId ??
@@ -21,9 +34,40 @@ export function ResultForm({ action, match }: ResultFormProps) {
           : null
       : null);
 
+  useEffect(() => {
+    if (state.type === "success") {
+      router.refresh();
+    }
+  }, [router, state.submittedAt, state.type]);
+
   return (
-    <form action={action} className="space-y-4">
+    <form action={formAction} className="space-y-4">
       <input type="hidden" name="matchId" value={match.id} />
+
+      {state.type !== "idle" ? (
+        <div
+          key={state.submittedAt}
+          className="pointer-events-none fixed inset-x-0 top-4 z-50 flex justify-center px-4"
+        >
+          <div
+            className={cn(
+              "prediction-feedback-toast flex w-full max-w-sm items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-bold shadow-[0_18px_50px_-24px_rgba(15,23,42,0.45)] backdrop-blur-md",
+              state.type === "success"
+                ? "border-emerald-200 bg-emerald-50/95 text-emerald-800"
+                : "border-rose-200 bg-rose-50/95 text-rose-800",
+            )}
+            role="status"
+            aria-live="polite"
+          >
+            {state.type === "success" ? (
+              <CheckCircle2 className="size-4 shrink-0" />
+            ) : (
+              <AlertCircle className="size-4 shrink-0" />
+            )}
+            <span>{state.message}</span>
+          </div>
+        </div>
+      ) : null}
 
       <div className="py-1 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
