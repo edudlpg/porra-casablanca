@@ -30,6 +30,12 @@ export function isRoundInWindow(unlockAt: Date | string, endDate: Date | string)
   return new Date(unlockAt).getTime() <= now && new Date(endDate).getTime() >= now;
 }
 
+export function isRoundPredictionWindow(unlockAt: Date | string, startDate: Date | string) {
+  const now = Date.now();
+
+  return new Date(unlockAt).getTime() <= now && new Date(startDate).getTime() > now;
+}
+
 export function getMatchSign(homeScore: number, awayScore: number) {
   if (homeScore > awayScore) {
     return "HOME";
@@ -46,9 +52,9 @@ export function isMatchEditable(
   startsAt: Date | string,
   isLocked: boolean,
   unlockAt: Date | string,
-  endDate?: Date | string,
+  startDate?: Date | string,
 ) {
-  const roundOpen = endDate ? isRoundInWindow(unlockAt, endDate) : isRoundOpen(unlockAt);
+  const roundOpen = startDate ? isRoundPredictionWindow(unlockAt, startDate) : isRoundOpen(unlockAt);
 
   return roundOpen && !isLocked && new Date(startsAt).getTime() > Date.now();
 }

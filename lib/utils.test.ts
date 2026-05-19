@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { isMatchEditable, isRoundInWindow, isRoundOpen } from "@/lib/utils";
+import { isMatchEditable, isRoundInWindow, isRoundOpen, isRoundPredictionWindow } from "@/lib/utils";
 
 describe("round availability helpers", () => {
   afterEach(() => {
@@ -23,7 +23,15 @@ describe("round availability helpers", () => {
     expect(isRoundInWindow("2026-06-28T11:00:00.000Z", "2026-06-28T11:59:00.000Z")).toBe(false);
   });
 
-  it("solo permite editar si la fase está abierta y el partido no ha empezado", () => {
+  it("mantiene las predicciones abiertas solo hasta startDate", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-06-28T12:00:00.000Z"));
+
+    expect(isRoundPredictionWindow("2026-06-28T11:00:00.000Z", "2026-06-28T13:00:00.000Z")).toBe(true);
+    expect(isRoundPredictionWindow("2026-06-28T11:00:00.000Z", "2026-06-28T12:00:00.000Z")).toBe(false);
+  });
+
+  it("solo permite editar si la fase está en ventana de predicción y el partido no ha empezado", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-06-20T12:00:00.000Z"));
 

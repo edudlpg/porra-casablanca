@@ -57,8 +57,8 @@ export async function savePredictionAction(
       unlockAt: {
         lte: new Date(),
       },
-      endDate: {
-        gte: new Date(),
+      startDate: {
+        gt: new Date(),
       },
     },
     orderBy: {
@@ -68,7 +68,7 @@ export async function savePredictionAction(
 
   if (
     currentRound?.id !== match.roundId ||
-    !isMatchEditable(match.startsAt, match.isLocked, match.round.unlockAt, match.round.endDate)
+    !isMatchEditable(match.startsAt, match.isLocked, match.round.unlockAt, match.round.startDate)
   ) {
     return buildPredictionActionState("error", "La fase o el partido ya no admiten cambios.");
   }

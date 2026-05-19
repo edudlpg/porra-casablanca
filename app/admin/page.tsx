@@ -37,12 +37,7 @@ const ADMIN_LINKS: Array<{
     {
       href: "/admin/ajustes",
       title: "⚙️ Ajustes",
-      description: "Configuración general de la porra y del bote",
-    },
-    {
-      href: "/admin/exportar",
-      title: "💾 Exportar CSV",
-      description: "Descarga un backup completo de usuarios, partidos y porras",
+      description: "Configuración general de la porra, bote y backups",
     },
   ];
 

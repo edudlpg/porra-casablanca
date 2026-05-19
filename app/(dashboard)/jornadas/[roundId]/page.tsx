@@ -8,7 +8,7 @@ import { PredictionForm } from "@/components/predictions/prediction-form";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatMatchVenue } from "@/lib/venues";
-import { isRoundInWindow, isMatchEditable } from "@/lib/utils";
+import { isRoundPredictionWindow, isMatchEditable } from "@/lib/utils";
 import { savePredictionAction } from "@/app/(dashboard)/jornadas/actions";
 
 type Params = Promise<{ roundId: string }>;
@@ -59,15 +59,16 @@ export default async function RoundDetailPage({
       unlockAt: {
         lte: new Date(),
       },
-      endDate: {
-        gte: new Date(),
+      startDate: {
+        gt: new Date(),
       },
     },
     orderBy: {
       startDate: "asc",
     },
   });
-  const isCurrentRound = currentRound?.id === round.id && isRoundInWindow(round.unlockAt, round.endDate);
+  const isCurrentRound =
+    currentRound?.id === round.id && isRoundPredictionWindow(round.unlockAt, round.startDate);
 
   return (
     <div className="space-y-6">
@@ -91,7 +92,7 @@ export default async function RoundDetailPage({
             scoreLabel={
               match.predictions[0] &&
               isCurrentRound &&
-              isMatchEditable(match.startsAt, match.isLocked, match.round.unlockAt, match.round.endDate)
+              isMatchEditable(match.startsAt, match.isLocked, match.round.unlockAt, match.round.startDate)
                 ? `Tu porra: ${match.predictions[0].predictedHomeScore}-${match.predictions[0].predictedAwayScore}`
                 : undefined
             }

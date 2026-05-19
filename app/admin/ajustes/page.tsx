@@ -1,8 +1,11 @@
+import { Download } from "lucide-react";
+
 import { saveAppConfigAction } from "@/app/admin/actions";
 import { AppConfigForm } from "@/components/admin/app-config-form";
 import { BackLink } from "@/components/layout/back-link";
 import { FeedbackBanner } from "@/components/layout/feedback-banner";
 import { PageHeader } from "@/components/layout/page-header";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
 
@@ -36,6 +39,23 @@ export default async function AdminSettingsPage({
         </CardHeader>
         <CardContent>
           <AppConfigForm action={saveAppConfigAction} defaultEntryFee={config?.entryFee ?? 0} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>💾 Exportar CSV</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-slate-600">
+            Descarga un backup completo con usuarios, partidos, resultados y predicciones.
+          </p>
+          <Button asChild className="w-full" size="lg">
+            <a href="/admin/exportar/backup">
+              <Download className="size-4" />
+              Descargar backup CSV
+            </a>
+          </Button>
         </CardContent>
       </Card>
     </div>

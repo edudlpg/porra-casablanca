@@ -41,7 +41,7 @@ async function getAdminPredictionsRound(now: Date) {
   const activeRound = await prisma.round.findFirst({
     where: {
       unlockAt: { lte: now },
-      endDate: { gte: now },
+      startDate: { gt: now },
     },
     orderBy: {
       startDate: "asc",
@@ -54,7 +54,7 @@ async function getAdminPredictionsRound(now: Date) {
 
   const nextRound = await prisma.round.findFirst({
     where: {
-      endDate: { gte: now },
+      startDate: { gt: now },
     },
     orderBy: {
       startDate: "asc",
@@ -142,7 +142,7 @@ export default async function AdminPredictionsPage() {
     });
 
   const completedUsers = rows.filter((row) => row.savedPredictions === totalMatches && totalMatches > 0).length;
-  const roundIsOpen = round.unlockAt <= now && round.endDate >= now;
+  const roundIsOpen = round.unlockAt <= now && round.startDate > now;
 
   return (
     <div className="space-y-6">

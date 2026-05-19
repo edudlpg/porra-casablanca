@@ -1,7 +1,7 @@
+import { LocalDateTimeInput } from "@/components/admin/local-date-time-input";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/layout/submit-button";
-import { formatDateForInput } from "@/lib/utils";
 
 type RoundFormProps = {
   action: (formData: FormData) => void;
@@ -28,33 +28,28 @@ export function RoundForm({ action, defaultValues }: RoundFormProps) {
         />
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
           <Label htmlFor={`round-unlock-${defaultValues?.id ?? "new"}`}>Apertura</Label>
-          <Input
+          <LocalDateTimeInput
             id={`round-unlock-${defaultValues?.id ?? "new"}`}
             name="unlockAt"
-            type="datetime-local"
-            defaultValue={defaultValues?.unlockAt ? formatDateForInput(defaultValues.unlockAt) : ""}
+            defaultValue={defaultValues?.unlockAt?.toISOString()}
           />
         </div>
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
           <Label htmlFor={`round-start-${defaultValues?.id ?? "new"}`}>Inicio</Label>
-          <Input
+          <LocalDateTimeInput
             id={`round-start-${defaultValues?.id ?? "new"}`}
             name="startDate"
-            type="datetime-local"
-            defaultValue={
-              defaultValues?.startDate ? formatDateForInput(defaultValues.startDate) : ""
-            }
+            defaultValue={defaultValues?.startDate?.toISOString()}
           />
         </div>
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
           <Label htmlFor={`round-end-${defaultValues?.id ?? "new"}`}>Fin</Label>
-          <Input
+          <LocalDateTimeInput
             id={`round-end-${defaultValues?.id ?? "new"}`}
             name="endDate"
-            type="datetime-local"
-            defaultValue={defaultValues?.endDate ? formatDateForInput(defaultValues.endDate) : ""}
+            defaultValue={defaultValues?.endDate?.toISOString()}
           />
         </div>
       </div>

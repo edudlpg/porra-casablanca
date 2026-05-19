@@ -1,10 +1,10 @@
 import type { BroadcastPartner, Round, Team } from "@prisma/client";
 
 import { BroadcastSwitch } from "@/components/admin/broadcast-switch";
+import { LocalDateTimeInput } from "@/components/admin/local-date-time-input";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/layout/submit-button";
-import { formatDateForInput } from "@/lib/utils";
 
 type MatchFormProps = {
   action: (formData: FormData) => void;
@@ -79,13 +79,12 @@ export function MatchForm({ action, rounds, teams, defaultValues }: MatchFormPro
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div className="min-w-0 space-y-2">
         <Label htmlFor={`match-start-${defaultValues?.id ?? "new"}`}>Fecha y hora</Label>
-        <Input
+        <LocalDateTimeInput
           id={`match-start-${defaultValues?.id ?? "new"}`}
           name="startsAt"
-          type="datetime-local"
-          defaultValue={defaultValues?.startsAt ? formatDateForInput(defaultValues.startsAt) : ""}
+          defaultValue={defaultValues?.startsAt?.toISOString()}
         />
       </div>
 

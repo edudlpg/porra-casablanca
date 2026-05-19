@@ -37,8 +37,8 @@ export default async function HomePage() {
         unlockAt: {
           lte: now,
         },
-        endDate: {
-          gte: now,
+        startDate: {
+          gt: now,
         },
       },
       orderBy: {
@@ -156,7 +156,7 @@ export default async function HomePage() {
               {nextRound?.name ?? "Aún no hay jornadas creadas"}
             </h2>
           </div>
-          {nextRound ? <Countdown target={nextRound.endDate} initialNow={initialCountdownNow} /> : null}
+          {nextRound ? <Countdown target={nextRound.startDate} initialNow={initialCountdownNow} /> : null}
         </CardContent>
       </Card>
 
