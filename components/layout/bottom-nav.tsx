@@ -34,7 +34,7 @@ export function BottomNav({ isAdmin }: BottomNavProps) {
   const items = isAdmin ? [...USER_ITEMS, ...ADMIN_ITEMS] : USER_ITEMS;
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/80 bg-white/95 px-3 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur">
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/80 bg-white/95 px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-2.5 backdrop-blur">
       <div className="mx-auto flex max-w-md items-center justify-between gap-2">
         {items.map((item) => {
           const active =
