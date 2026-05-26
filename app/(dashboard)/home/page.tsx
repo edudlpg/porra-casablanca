@@ -32,99 +32,100 @@ export default async function HomePage() {
     startsAt: { gt: now },
   } as const;
 
-  const [nextRound, upcomingMatches, users, config] = await Promise.all([
-    prisma.round.findFirst({
-      where: {
-        unlockAt: {
-          lte: now,
-        },
-        startDate: {
-          gt: now,
-        },
+  const nextRound = await prisma.round.findFirst({
+    where: {
+      unlockAt: {
+        lte: now,
       },
-      orderBy: {
-        startDate: "asc",
+      startDate: {
+        gt: now,
       },
-      select: {
-        id: true,
-        name: true,
-        startDate: true,
-      },
-    }),
-    prisma.match.findMany({
-      where: upcomingMatchesWhere,
-      select: {
-        id: true,
-        roundId: true,
-        homeTeamId: true,
-        awayTeamId: true,
-        winnerTeamId: true,
-        homeSlotLabel: true,
-        awaySlotLabel: true,
-        venueName: true,
-        venueCity: true,
-        startsAt: true,
-        homeScore: true,
-        awayScore: true,
-        broadcast: true,
-        isLocked: true,
-        createdAt: true,
-        round: {
-          select: {
-            id: true,
-            name: true,
-            unlockAt: true,
-            startDate: true,
-            endDate: true,
-            createdAt: true,
-          },
-        },
-        homeTeam: {
-          select: {
-            id: true,
-            name: true,
-            flagUrl: true,
-            groupCode: true,
-          },
-        },
-        awayTeam: {
-          select: {
-            id: true,
-            name: true,
-            flagUrl: true,
-            groupCode: true,
-          },
+    },
+    orderBy: {
+      startDate: "asc",
+    },
+    select: {
+      id: true,
+      name: true,
+      startDate: true,
+    },
+  });
+
+  const upcomingMatches = await prisma.match.findMany({
+    where: upcomingMatchesWhere,
+    select: {
+      id: true,
+      roundId: true,
+      homeTeamId: true,
+      awayTeamId: true,
+      winnerTeamId: true,
+      homeSlotLabel: true,
+      awaySlotLabel: true,
+      venueName: true,
+      venueCity: true,
+      startsAt: true,
+      homeScore: true,
+      awayScore: true,
+      broadcast: true,
+      isLocked: true,
+      createdAt: true,
+      round: {
+        select: {
+          id: true,
+          name: true,
+          unlockAt: true,
+          startDate: true,
+          endDate: true,
+          createdAt: true,
         },
       },
-      orderBy: {
-        startsAt: "asc",
-      },
-      take: 3,
-    }),
-    prisma.user.findMany({
-      where: {
-        role: "USER",
-      },
-      select: {
-        id: true,
-        name: true,
-        username: true,
-        email: true,
-        teamName: true,
-        avatarUrl: true,
-        predictions: {
-          select: {
-            points: true,
-            scoreType: true,
-          },
+      homeTeam: {
+        select: {
+          id: true,
+          name: true,
+          flagUrl: true,
+          groupCode: true,
         },
       },
-      orderBy: {
-        createdAt: "asc",
+      awayTeam: {
+        select: {
+          id: true,
+          name: true,
+          flagUrl: true,
+          groupCode: true,
+        },
       },
-    }),
-    getCachedAppConfig(),
-  ]);
+    },
+    orderBy: {
+      startsAt: "asc",
+    },
+    take: 3,
+  });
+
+  const users = await prisma.user.findMany({
+    where: {
+      role: "USER",
+    },
+    select: {
+      id: true,
+      name: true,
+      username: true,
+      email: true,
+      teamName: true,
+      avatarUrl: true,
+      predictions: {
+        select: {
+          points: true,
+          scoreType: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+  });
+
+  const config = await getCachedAppConfig();
 
   const pendingMatchesCount = nextRound
     ? await prisma.match.count({

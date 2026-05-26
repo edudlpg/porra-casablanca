@@ -12,8 +12,21 @@ if (!connectionString) {
   throw new Error("DATABASE_URL no está definida.");
 }
 
+function getDatabasePoolMax() {
+  const value = Number.parseInt(process.env.DATABASE_POOL_MAX ?? "5", 10);
+
+  if (Number.isFinite(value) && value > 0) {
+    return value;
+  }
+
+  return 5;
+}
+
 const adapter = new PrismaPg({
   connectionString,
+  connectionTimeoutMillis: 5_000,
+  idleTimeoutMillis: 10_000,
+  max: getDatabasePoolMax(),
 });
 
 export const prisma =
