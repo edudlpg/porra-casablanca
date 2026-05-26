@@ -50,6 +50,7 @@ model User {
   role         Role         @default(USER)
   createdAt    DateTime     @default(now())
   predictions  Prediction[]
+  attendances  MatchAttendance[]
 }
 
 model AuthRateLimit {
@@ -114,6 +115,7 @@ model Match {
   awayTeam    Team         @relation("AwayTeamMatches", fields: [awayTeamId], references: [id], onDelete: Restrict)
   winnerTeam  Team?        @relation("WinnerTeamMatches", fields: [winnerTeamId], references: [id], onDelete: SetNull)
   predictions Prediction[]
+  attendances MatchAttendance[]
 
   @@index([roundId, startsAt])
   @@index([winnerTeamId])
@@ -131,6 +133,20 @@ model Prediction {
   updatedAt           DateTime  @updatedAt
   user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   match               Match     @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, matchId])
+  @@index([matchId])
+  @@index([userId])
+}
+
+model MatchAttendance {
+  id        String   @id @default(cuid())
+  userId    String
+  matchId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
 
   @@unique([userId, matchId])
   @@index([matchId])

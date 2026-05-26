@@ -17,8 +17,7 @@
     "prisma:seed": "node --import tsx/esm prisma/seed.ts",
     "prisma:backfill:broadcasts": "node --import tsx/esm prisma/backfill-match-broadcasts.ts",
     "prisma:backfill:team-groups": "node --import tsx/esm prisma/backfill-team-groups.ts",
-    "prisma:backfill:match-slots": "node --import tsx/esm prisma/backfill-match-slot-labels.ts",
-    "prisma:demo:knockout": "node --import tsx/esm prisma/create-demo-knockout.ts"
+    "prisma:backfill:match-slots": "node --import tsx/esm prisma/backfill-match-slot-labels.ts"
   },
   "keywords": [
     "nextjs",

@@ -36,6 +36,30 @@ function getGroupStatusMap(
   return statusByGroup;
 }
 
+function getGroupStatusBadge(status?: { total: number; completed: number }) {
+  const completed = status?.completed ?? 0;
+  const total = status?.total ?? 0;
+
+  if (total > 0 && completed >= total) {
+    return {
+      label: "Finalizado",
+      variant: "success" as const,
+    };
+  }
+
+  if (completed > 0) {
+    return {
+      label: "En juego",
+      variant: "warning" as const,
+    };
+  }
+
+  return {
+    label: "Por empezar",
+    variant: "secondary" as const,
+  };
+}
+
 function getGroupRowClass(index: number) {
   if (index < 2) {
     return "rounded-2xl bg-emerald-50 text-sm text-emerald-950";
@@ -144,20 +168,20 @@ export default async function WorldCupGroupStandingsPage() {
         <div className="space-y-4">
           {standings.map((group) => {
             const groupStatus = groupStatusMap.get(group.groupCode);
-            const isFinalized = Boolean(groupStatus && groupStatus.total > 0 && groupStatus.total === groupStatus.completed);
+            const statusBadge = getGroupStatusBadge(groupStatus);
             const completedMatches = groupStatus?.completed ?? 0;
             const totalMatches = groupStatus?.total ?? 0;
             const progressPercentage = totalMatches > 0 ? (completedMatches / totalMatches) * 100 : 0;
 
             return (
-              <Card key={group.groupCode} className="relative overflow-hidden">
-                <CardCornerGraphic variant="match" className="blur-[1.5px] opacity-80" />
+              <Card key={group.groupCode} className="relative overflow-hidden bg-white/72">
+                <CardCornerGraphic variant="match" className="blur-[1.5px] opacity-45" />
                 <CardHeader className="relative z-10 pb-3">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-3">
                       <CardTitle className="font-bold">Grupo {group.groupCode}</CardTitle>
-                      <Badge variant={isFinalized ? "success" : "secondary"} className="font-bold">
-                        {isFinalized ? "Cerrado" : "En juego"}
+                      <Badge variant={statusBadge.variant} className="font-bold">
+                        {statusBadge.label}
                       </Badge>
                     </div>
                     <div className="h-1 overflow-hidden rounded-full bg-slate-200/80">
@@ -204,8 +228,8 @@ export default async function WorldCupGroupStandingsPage() {
             );
           })}
 
-          <Card className="relative overflow-hidden">
-            <CardCornerGraphic variant="match" className="blur-[1.5px] opacity-80" />
+          <Card className="relative overflow-hidden bg-white/72">
+            <CardCornerGraphic variant="match" className="blur-[1.5px] opacity-45" />
             <CardHeader className="relative z-10 pb-3">
               <div className="flex items-center justify-between gap-3">
                 <CardTitle className="font-bold">Mejores terceros</CardTitle>

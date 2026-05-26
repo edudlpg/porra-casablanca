@@ -24,14 +24,16 @@ export default function WorldCupPage() {
           </Card>
         </Link>
 
-        <Card className="border-dashed border-slate-300 bg-slate-50/80">
-          <CardContent className="space-y-1 p-5">
-            <p className="font-bold text-slate-950">Guía Equipos</p>
-            <p className="text-sm text-slate-500">
-              ¡Próximamente!
-            </p>
-          </CardContent>
-        </Card>
+        <Link href="/mundial/equipos" className="block">
+          <Card className="transition hover:-translate-y-0.5">
+            <CardContent className="space-y-1 p-5">
+              <p className="font-bold text-slate-950">Guía de equipos</p>
+              <p className="text-sm text-slate-500">
+                Colores, figuras, rivales y expectativas de cada selección
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
     </div>
   );
