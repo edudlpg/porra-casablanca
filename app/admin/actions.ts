@@ -299,21 +299,19 @@ export async function saveResultAction(
         },
       });
 
-      await Promise.all(
-        predictions.map((prediction) => {
-          const scored = calculatePredictionScore(
-            prediction.predictedHomeScore,
-            prediction.predictedAwayScore,
-            parsed.data.homeScore,
-            parsed.data.awayScore,
-          );
+      for (const prediction of predictions) {
+        const scored = calculatePredictionScore(
+          prediction.predictedHomeScore,
+          prediction.predictedAwayScore,
+          parsed.data.homeScore,
+          parsed.data.awayScore,
+        );
 
-          return tx.prediction.update({
-            where: { id: prediction.id },
-            data: scored,
-          });
-        }),
-      );
+        await tx.prediction.update({
+          where: { id: prediction.id },
+          data: scored,
+        });
+      }
 
       await synchronizeTournamentProgression(tx);
     },

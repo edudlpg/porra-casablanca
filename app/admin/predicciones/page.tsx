@@ -93,37 +93,35 @@ export default async function AdminPredictionsPage() {
     );
   }
 
-  const [totalMatches, users] = await Promise.all([
-    prisma.match.count({
-      where: {
-        roundId: round.id,
-      },
-    }),
-    prisma.user.findMany({
-      where: {
-        role: "USER",
-      },
-      select: {
-        id: true,
-        name: true,
-        username: true,
-        teamName: true,
-        predictions: {
-          where: {
-            match: {
-              roundId: round.id,
-            },
-          },
-          select: {
-            id: true,
+  const totalMatches = await prisma.match.count({
+    where: {
+      roundId: round.id,
+    },
+  });
+  const users = await prisma.user.findMany({
+    where: {
+      role: "USER",
+    },
+    select: {
+      id: true,
+      name: true,
+      username: true,
+      teamName: true,
+      predictions: {
+        where: {
+          match: {
+            roundId: round.id,
           },
         },
+        select: {
+          id: true,
+        },
       },
-      orderBy: {
-        createdAt: "asc",
-      },
-    }),
-  ]);
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+  });
 
   const rows = users
     .map((user) => {

@@ -63,64 +63,62 @@ export async function GET() {
     return new Response("Prohibido", { status: 403 });
   }
 
-  const [users, matches, predictions] = await Promise.all([
-    prisma.user.findMany({
-      select: {
-        id: true,
-        username: true,
-        name: true,
-        teamName: true,
-        role: true,
-        createdAt: true,
-      },
-      orderBy: [{ role: "asc" }, { username: "asc" }, { name: "asc" }],
-    }),
-    prisma.match.findMany({
-      select: {
-        id: true,
-        startsAt: true,
-        homeScore: true,
-        awayScore: true,
-        createdAt: true,
-        round: { select: { name: true } },
-        homeTeam: { select: { name: true } },
-        awayTeam: { select: { name: true } },
-        winnerTeam: { select: { name: true } },
-      },
-      orderBy: [{ startsAt: "asc" }],
-    }),
-    prisma.prediction.findMany({
-      select: {
-        userId: true,
-        matchId: true,
-        predictedHomeScore: true,
-        predictedAwayScore: true,
-        points: true,
-        scoreType: true,
-        createdAt: true,
-        updatedAt: true,
-        user: {
-          select: {
-            username: true,
-            name: true,
-            teamName: true,
-            role: true,
-          },
-        },
-        match: {
-          select: {
-            startsAt: true,
-            homeScore: true,
-            awayScore: true,
-            round: { select: { name: true } },
-            homeTeam: { select: { name: true } },
-            awayTeam: { select: { name: true } },
-          },
+  const users = await prisma.user.findMany({
+    select: {
+      id: true,
+      username: true,
+      name: true,
+      teamName: true,
+      role: true,
+      createdAt: true,
+    },
+    orderBy: [{ role: "asc" }, { username: "asc" }, { name: "asc" }],
+  });
+  const matches = await prisma.match.findMany({
+    select: {
+      id: true,
+      startsAt: true,
+      homeScore: true,
+      awayScore: true,
+      createdAt: true,
+      round: { select: { name: true } },
+      homeTeam: { select: { name: true } },
+      awayTeam: { select: { name: true } },
+      winnerTeam: { select: { name: true } },
+    },
+    orderBy: [{ startsAt: "asc" }],
+  });
+  const predictions = await prisma.prediction.findMany({
+    select: {
+      userId: true,
+      matchId: true,
+      predictedHomeScore: true,
+      predictedAwayScore: true,
+      points: true,
+      scoreType: true,
+      createdAt: true,
+      updatedAt: true,
+      user: {
+        select: {
+          username: true,
+          name: true,
+          teamName: true,
+          role: true,
         },
       },
-      orderBy: [{ match: { startsAt: "asc" } }, { user: { username: "asc" } }],
-    }),
-  ]);
+      match: {
+        select: {
+          startsAt: true,
+          homeScore: true,
+          awayScore: true,
+          round: { select: { name: true } },
+          homeTeam: { select: { name: true } },
+          awayTeam: { select: { name: true } },
+        },
+      },
+    },
+    orderBy: [{ match: { startsAt: "asc" } }, { user: { username: "asc" } }],
+  });
 
   const rows: CsvRow[] = [
     ...users.map((user) => ({

@@ -109,10 +109,8 @@ function CompactTeamCell({
 }
 
 export default async function WorldCupGroupStandingsPage() {
-  const [teams, matches] = await Promise.all([
-    getCachedWorldCupTeams(),
-    getCachedGroupStageMatches(),
-  ]);
+  const teams = await getCachedWorldCupTeams();
+  const matches = await getCachedGroupStageMatches();
 
   const standings = buildGroupStandings(teams, matches);
   const bestThirdPlaceRows = buildBestThirdPlaceRows(standings);

@@ -16,47 +16,45 @@ export default async function AdminMatchesPage({
   searchParams: SearchParams;
 }) {
   const query = await searchParams;
-  const [rounds, teams, matches] = await Promise.all([
-    prisma.round.findMany({ orderBy: { startDate: "asc" } }),
-    prisma.team.findMany({
-      select: {
-        id: true,
-        name: true,
-        flagUrl: true,
-        groupCode: true,
-      },
-      orderBy: { name: "asc" },
-    }),
-    prisma.match.findMany({
-      select: {
-        id: true,
-        roundId: true,
-        homeTeamId: true,
-        awayTeamId: true,
-        venueName: true,
-        venueCity: true,
-        startsAt: true,
-        broadcast: true,
-        isLocked: true,
-        round: {
-          select: {
-            name: true,
-          },
-        },
-        homeTeam: {
-          select: {
-            name: true,
-          },
-        },
-        awayTeam: {
-          select: {
-            name: true,
-          },
+  const rounds = await prisma.round.findMany({ orderBy: { startDate: "asc" } });
+  const teams = await prisma.team.findMany({
+    select: {
+      id: true,
+      name: true,
+      flagUrl: true,
+      groupCode: true,
+    },
+    orderBy: { name: "asc" },
+  });
+  const matches = await prisma.match.findMany({
+    select: {
+      id: true,
+      roundId: true,
+      homeTeamId: true,
+      awayTeamId: true,
+      venueName: true,
+      venueCity: true,
+      startsAt: true,
+      broadcast: true,
+      isLocked: true,
+      round: {
+        select: {
+          name: true,
         },
       },
-      orderBy: { startsAt: "asc" },
-    }),
-  ]);
+      homeTeam: {
+        select: {
+          name: true,
+        },
+      },
+      awayTeam: {
+        select: {
+          name: true,
+        },
+      },
+    },
+    orderBy: { startsAt: "asc" },
+  });
 
   return (
     <div className="space-y-6">

@@ -7,31 +7,29 @@ import { buildRankingEntries } from "@/lib/ranking";
 import type { RankingEntry } from "@/types";
 
 export default async function RankingPage() {
-  const [users, config] = await Promise.all([
-    prisma.user.findMany({
-      where: {
-        role: "USER",
-      },
-      select: {
-        id: true,
-        name: true,
-        username: true,
-        email: true,
-        teamName: true,
-        avatarUrl: true,
-        predictions: {
-          select: {
-            points: true,
-            scoreType: true,
-          },
+  const users = await prisma.user.findMany({
+    where: {
+      role: "USER",
+    },
+    select: {
+      id: true,
+      name: true,
+      username: true,
+      email: true,
+      teamName: true,
+      avatarUrl: true,
+      predictions: {
+        select: {
+          points: true,
+          scoreType: true,
         },
       },
-      orderBy: {
-        createdAt: "asc",
-      },
-    }),
-    getCachedAppConfig(),
-  ]);
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+  });
+  const config = await getCachedAppConfig();
 
   const entries: RankingEntry[] = buildRankingEntries(users, config?.entryFee ?? 0);
 

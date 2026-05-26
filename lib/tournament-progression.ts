@@ -223,23 +223,21 @@ function resolveAdvancingTeamId(
 }
 
 export async function synchronizeTournamentProgression(client: SyncClient) {
-  const [teams, matches] = await Promise.all([
-    client.team.findMany({
-      orderBy: {
-        name: "asc",
-      },
-    }),
-    client.match.findMany({
-      include: {
-        round: true,
-        homeTeam: true,
-        awayTeam: true,
-      },
-      orderBy: {
-        startsAt: "asc",
-      },
-    }),
-  ]);
+  const teams = await client.team.findMany({
+    orderBy: {
+      name: "asc",
+    },
+  });
+  const matches = await client.match.findMany({
+    include: {
+      round: true,
+      homeTeam: true,
+      awayTeam: true,
+    },
+    orderBy: {
+      startsAt: "asc",
+    },
+  });
 
   const mutableMatches: MatchSummary[] = matches.map((match) => ({
     ...match,
@@ -272,8 +270,17 @@ export async function synchronizeTournamentProgression(client: SyncClient) {
 
   }
 
-  const updates: Array<ReturnType<SyncClient["match"]["update"]>> = [];
-  const predictionResets: Array<ReturnType<SyncClient["prediction"]["updateMany"]>> = [];
+  const updates: Array<{
+    id: string;
+    data: {
+      homeTeamId: string;
+      awayTeamId: string;
+      homeScore: number | null;
+      awayScore: number | null;
+      winnerTeamId: string | null;
+    };
+  }> = [];
+  const predictionResetMatchIds: string[] = [];
 
   for (const match of mutableMatches) {
     if (!match.homeSlotLabel || !match.awaySlotLabel) {
@@ -309,14 +316,7 @@ export async function synchronizeTournamentProgression(client: SyncClient) {
     if (participantsChanged && (match.homeScore !== null || match.awayScore !== null)) {
       match.homeScore = null;
       match.awayScore = null;
-      predictionResets.push(
-        client.prediction.updateMany({
-          where: {
-            matchId: match.id,
-          },
-          data: predictionResetData,
-        }),
-      );
+      predictionResetMatchIds.push(match.id);
     }
 
     match.homeTeamId = nextHomeTeamId;
@@ -332,28 +332,34 @@ export async function synchronizeTournamentProgression(client: SyncClient) {
       previousHomeScore !== match.homeScore ||
       previousAwayScore !== match.awayScore
     ) {
-      updates.push(
-        client.match.update({
-          where: {
-            id: match.id,
-          },
-          data: {
-            homeTeamId: nextHomeTeamId,
-            awayTeamId: nextAwayTeamId,
-            homeScore: match.homeScore,
-            awayScore: match.awayScore,
-            winnerTeamId: nextWinnerTeamId,
-          },
-        }),
-      );
+      updates.push({
+        id: match.id,
+        data: {
+          homeTeamId: nextHomeTeamId,
+          awayTeamId: nextAwayTeamId,
+          homeScore: match.homeScore,
+          awayScore: match.awayScore,
+          winnerTeamId: nextWinnerTeamId,
+        },
+      });
     }
   }
 
-  if (updates.length) {
-    await Promise.all(updates);
+  for (const update of updates) {
+    await client.match.update({
+      where: {
+        id: update.id,
+      },
+      data: update.data,
+    });
   }
 
-  if (predictionResets.length) {
-    await Promise.all(predictionResets);
+  for (const matchId of predictionResetMatchIds) {
+    await client.prediction.updateMany({
+      where: {
+        matchId,
+      },
+      data: predictionResetData,
+    });
   }
 }

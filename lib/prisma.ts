@@ -13,13 +13,13 @@ if (!connectionString) {
 }
 
 function getDatabasePoolMax() {
-  const value = Number.parseInt(process.env.DATABASE_POOL_MAX ?? "5", 10);
+  const value = Number.parseInt(process.env.DATABASE_POOL_MAX ?? "2", 10);
 
   if (Number.isFinite(value) && value > 0) {
     return value;
   }
 
-  return 5;
+  return 2;
 }
 
 const adapter = new PrismaPg({

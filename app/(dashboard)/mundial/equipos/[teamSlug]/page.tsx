@@ -73,55 +73,53 @@ export default async function TeamGuideDetailPage({ params }: { params: Params }
     notFound();
   }
 
-  const [groupTeams, matches] = await Promise.all([
-    prisma.team.findMany({
-      where: {
-        groupCode: team.groupCode,
+  const groupTeams = await prisma.team.findMany({
+    where: {
+      groupCode: team.groupCode,
+    },
+    select: {
+      id: true,
+      name: true,
+      flagUrl: true,
+      groupCode: true,
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
+  const matches = await prisma.match.findMany({
+    where: {
+      round: {
+        name: "Fase de grupos",
       },
-      select: {
-        id: true,
-        name: true,
-        flagUrl: true,
-        groupCode: true,
-      },
-      orderBy: {
-        name: "asc",
-      },
-    }),
-    prisma.match.findMany({
-      where: {
-        round: {
-          name: "Fase de grupos",
-        },
-        OR: [{ homeTeamId: team.id }, { awayTeamId: team.id }],
-      },
-      select: {
-        id: true,
-        homeTeamId: true,
-        awayTeamId: true,
-        startsAt: true,
-        homeTeam: {
-          select: {
-            id: true,
-            name: true,
-            flagUrl: true,
-            groupCode: true,
-          },
-        },
-        awayTeam: {
-          select: {
-            id: true,
-            name: true,
-            flagUrl: true,
-            groupCode: true,
-          },
+      OR: [{ homeTeamId: team.id }, { awayTeamId: team.id }],
+    },
+    select: {
+      id: true,
+      homeTeamId: true,
+      awayTeamId: true,
+      startsAt: true,
+      homeTeam: {
+        select: {
+          id: true,
+          name: true,
+          flagUrl: true,
+          groupCode: true,
         },
       },
-      orderBy: {
-        startsAt: "asc",
+      awayTeam: {
+        select: {
+          id: true,
+          name: true,
+          flagUrl: true,
+          groupCode: true,
+        },
       },
-    }),
-  ]);
+    },
+    orderBy: {
+      startsAt: "asc",
+    },
+  });
   const matchesByRivalId = new Map(
     matches.map((match) => {
       const rival = match.homeTeamId === team.id ? match.awayTeam : match.homeTeam;
