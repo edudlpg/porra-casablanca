@@ -18,15 +18,19 @@
 
 * {
   border-color: theme(colors.slate.200);
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
   background:
     radial-gradient(circle at top, rgba(15, 118, 110, 0.14), transparent 32%),
     linear-gradient(180deg, #f8fbff 0%, #f4f7fb 45%, #eef2f9 100%);
   color: var(--foreground);
   font-family: var(--font-sans-stack);
+  overscroll-behavior-y: none;
+  text-size-adjust: 100%;
 }
 
 a {
