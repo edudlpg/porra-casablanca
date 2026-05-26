@@ -81,7 +81,7 @@ export default async function AdminPredictionsPage() {
       <div className="space-y-6">
         <PageHeader
           eyebrow="Admin"
-          title="📊 Predicciones"
+          title="Predicciones"
           description="Revisa cuántas porras ha guardado cada usuario en la fase activa."
           action={<BackLink href="/admin" />}
         />
@@ -148,7 +148,7 @@ export default async function AdminPredictionsPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Admin"
-        title="📊 Predicciones"
+        title="Predicciones"
         description="Progreso de predicciones guardadas por usuario en la fase seleccionada automáticamente."
         action={<BackLink href="/admin" />}
       />

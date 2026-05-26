@@ -25,7 +25,7 @@ export default async function AdminSettingsPage({
     <div className="space-y-6">
       <PageHeader
         eyebrow="Admin"
-        title="⚙️ Ajustes"
+        title="Ajustes"
         description="Configuración general de la porra."
         action={<BackLink href="/admin" />}
       />
@@ -35,7 +35,7 @@ export default async function AdminSettingsPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>💰 Bote</CardTitle>
+          <CardTitle>Bote</CardTitle>
         </CardHeader>
         <CardContent>
           <AppConfigForm action={saveAppConfigAction} defaultEntryFee={config?.entryFee ?? 0} />
@@ -44,7 +44,7 @@ export default async function AdminSettingsPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>💾 Exportar CSV</CardTitle>
+          <CardTitle>Exportar CSV</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-slate-600">

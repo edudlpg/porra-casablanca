@@ -33,7 +33,7 @@ export default async function AdminMatchesPage({
     <div className="space-y-6">
       <PageHeader
         eyebrow="Admin"
-        title="⚽ Partidos"
+        title="Partidos"
         description="Edita los partidos ya cargados desde una única pantalla simple."
         action={<BackLink href="/admin" />}
       />

@@ -47,12 +47,6 @@ const WORLD_CUP_MATCH_NUMBER_BY_SIGNATURE = new Map(
   ]),
 );
 
-function parseDemoMatchNumber(match: MatchSummary) {
-  const matched = match.venueName?.match(/^Demo Partido (\d{1,3})$/);
-
-  return matched ? Number(matched[1]) : null;
-}
-
 function compareStandings(left: StandingLike, right: StandingLike) {
   return (
     right.points - left.points ||
@@ -276,11 +270,6 @@ export async function synchronizeTournamentProgression(client: SyncClient) {
       matchByNumber.set(matchNumber, match);
     }
 
-    const demoMatchNumber = parseDemoMatchNumber(match);
-
-    if (demoMatchNumber) {
-      matchByNumber.set(demoMatchNumber, match);
-    }
   }
 
   const updates: Array<ReturnType<SyncClient["match"]["update"]>> = [];

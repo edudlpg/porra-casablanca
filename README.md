@@ -62,9 +62,11 @@ Aplicar esquema a la base de datos:
 npm run prisma:push
 ```
 
-Opcional: cargar datos de ejemplo / torneo:
+Opcional: cargar el torneo base en una base local o de staging:
 
 ```bash
+SEED_ADMIN_EMAIL="..." SEED_ADMIN_USERNAME="..." SEED_ADMIN_PASSWORD="..." \
+SEED_USER_EMAIL="..." SEED_USER_USERNAME="..." SEED_USER_PASSWORD="..." \
 npm run prisma:seed
 ```
 
@@ -86,15 +88,14 @@ npm run prisma:generate
 npm run prisma:push
 npm run prisma:migrate
 npm run prisma:seed
-npm run prisma:backfill:broadcasts
 ```
 
 ## Usuarios de seed
 
-Si ejecutas `npm run prisma:seed`, se crean estos usuarios:
+El seed recrea equipos, jornadas y partidos. No se ejecuta con `NODE_ENV=production`.
+Si lo ejecutas, crea un administrador y un usuario normal con los emails, usuarios y contraseñas que definas en las variables `SEED_*`.
 
-- `admin` / `admin1234`
-- `maria` / `usuario1234`
+No hay credenciales de seed por defecto en el código.
 
 ## Despliegue
 
@@ -102,7 +103,8 @@ La app se puede desplegar en Vercel conectando el repositorio y configurando las
 
 La clasificación no se persiste como tabla separada: se reconstruye desde usuarios y predicciones. Cuando un admin guarda un resultado, la app recalcula automáticamente los puntos de las porras de ese partido.
 
-## Notas
+## Preparación para producción
 
-- Esta versión sigue siendo iterativa y mantiene código de pruebas y decisiones temporales.
-- No se ha hecho todavía la refactorización general ni la limpieza de flujos antiguos de demo.
+- Configura `DATABASE_URL` y `AUTH_SECRET` en el proveedor de despliegue.
+- No ejecutes `npm run prisma:seed` contra producción; el seed elimina predicciones, partidos, jornadas y equipos antes de cargar el calendario base.
+- Revisa que no queden usuarios de seed como `admin@porra.local` en la base productiva antes de abrir el acceso.

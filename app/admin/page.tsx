@@ -11,32 +11,32 @@ const ADMIN_LINKS: Array<{
 }> = [
     {
       href: "/admin/jornadas",
-      title: "🗓️ Jornadas",
+      title: "Jornadas",
       description: "Apertura, inicio y cierre de cada fase",
     },
     {
       href: "/admin/partidos",
-      title: "⚽ Partidos",
+      title: "Partidos",
       description: "Equipos, horarios y sedes de los encuentros",
     },
     {
       href: "/admin/resultados",
-      title: "🏁 Resultados",
+      title: "Resultados",
       description: "Marcadores finales y recálculo de puntos",
     },
     {
       href: "/admin/predicciones",
-      title: "📊 Predicciones",
+      title: "Predicciones",
       description: "Progreso de porras guardadas por usuario",
     },
     {
       href: "/admin/contrasenas",
-      title: "👤 Usuarios",
+      title: "Usuarios",
       description: "Gestiona usuarios, contraseñas y bajas",
     },
     {
       href: "/admin/ajustes",
-      title: "⚙️ Ajustes",
+      title: "Ajustes",
       description: "Configuración general de la porra, bote y backups",
     },
   ];

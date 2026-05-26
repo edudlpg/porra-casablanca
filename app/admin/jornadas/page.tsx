@@ -24,7 +24,7 @@ export default async function AdminRoundsPage({
     <div className="space-y-6">
       <PageHeader
         eyebrow="Admin"
-        title="🗓️ Jornadas"
+        title="Jornadas"
         description="Crea o edita jornadas con un flujo rápido pensado para móvil."
         action={<BackLink href="/admin" />}
       />

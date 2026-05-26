@@ -33,7 +33,7 @@ export default async function AdminResultsPage({
     <div className="space-y-6">
       <PageHeader
         eyebrow="Admin"
-        title="🏁 Resultados"
+        title="Resultados"
         description="Introduce marcadores reales, bloquea partidos y recalcula puntos cuando lo necesites."
         action={
           <div className="flex flex-wrap justify-end gap-2">

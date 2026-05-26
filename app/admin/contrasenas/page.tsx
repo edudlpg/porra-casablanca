@@ -35,7 +35,7 @@ export default async function AdminPasswordsPage({
     <div className="space-y-6">
       <PageHeader
         eyebrow="Admin"
-        title="👤 Usuarios"
+        title="Usuarios"
         description="Gestiona usuarios: cambia contraseñas o elimina cuentas si es necesario."
         action={<BackLink href="/admin" />}
       />

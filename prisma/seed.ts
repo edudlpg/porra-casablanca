@@ -5,6 +5,16 @@ import { getDefaultBroadcastForTeams } from "@/lib/broadcasts";
 import { prisma } from "@/lib/prisma";
 import { getWorldCup2026FixtureVenue, worldCup2026Fixtures, worldCup2026Rounds, worldCup2026Teams } from "@/prisma/world-cup-2026";
 
+function getRequiredSeedEnv(name: string) {
+  const value = process.env[name];
+
+  if (!value) {
+    throw new Error(`${name} debe estar definida para ejecutar el seed.`);
+  }
+
+  return value;
+}
+
 function getPlaceholderTeams() {
   const qualifiedTeamNames = new Set(worldCup2026Teams.map((team) => team.name));
 
@@ -22,42 +32,50 @@ function getPlaceholderTeams() {
 }
 
 async function main() {
-  const adminPasswordHash = await bcrypt.hash("admin1234", 10);
-  const userPasswordHash = await bcrypt.hash("usuario1234", 10);
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("El seed recrea datos y no debe ejecutarse con NODE_ENV=production.");
+  }
+
+  const seedAdminEmail = getRequiredSeedEnv("SEED_ADMIN_EMAIL");
+  const seedAdminUsername = getRequiredSeedEnv("SEED_ADMIN_USERNAME");
+  const seedUserEmail = getRequiredSeedEnv("SEED_USER_EMAIL");
+  const seedUserUsername = getRequiredSeedEnv("SEED_USER_USERNAME");
+  const adminPasswordHash = await bcrypt.hash(getRequiredSeedEnv("SEED_ADMIN_PASSWORD"), 10);
+  const userPasswordHash = await bcrypt.hash(getRequiredSeedEnv("SEED_USER_PASSWORD"), 10);
 
   await prisma.user.upsert({
-    where: { email: "admin@porra.local" },
+    where: { email: seedAdminEmail },
     update: {
       name: "Admin",
-      username: "admin",
-      teamName: "admin",
+      username: seedAdminUsername,
+      teamName: seedAdminUsername,
       passwordHash: adminPasswordHash,
       role: Role.ADMIN,
     },
     create: {
       name: "Admin",
-      username: "admin",
-      teamName: "admin",
-      email: "admin@porra.local",
+      username: seedAdminUsername,
+      teamName: seedAdminUsername,
+      email: seedAdminEmail,
       passwordHash: adminPasswordHash,
       role: Role.ADMIN,
     },
   });
 
   await prisma.user.upsert({
-    where: { email: "maria@porra.local" },
+    where: { email: seedUserEmail },
     update: {
-      name: "Maria",
-      username: "maria",
-      teamName: "maria",
+      name: seedUserUsername,
+      username: seedUserUsername,
+      teamName: seedUserUsername,
       passwordHash: userPasswordHash,
       role: Role.USER,
     },
     create: {
-      name: "Maria",
-      username: "maria",
-      teamName: "maria",
-      email: "maria@porra.local",
+      name: seedUserUsername,
+      username: seedUserUsername,
+      teamName: seedUserUsername,
+      email: seedUserEmail,
       passwordHash: userPasswordHash,
       role: Role.USER,
     },
