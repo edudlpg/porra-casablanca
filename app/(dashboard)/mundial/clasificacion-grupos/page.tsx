@@ -1,12 +1,12 @@
 import { BackLink } from "@/components/layout/back-link";
 import { EmptyState } from "@/components/layout/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
+import { FlagImage } from "@/components/teams/flag-image";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CardCornerGraphic } from "@/components/ui/card-corner-graphic";
-import { getDisplayFlagUrl, getFlagEmoji } from "@/lib/flags";
+import { getCachedGroupStageMatches, getCachedWorldCupTeams } from "@/lib/data-cache";
 import { buildBestThirdPlaceRows, buildGroupStandings } from "@/lib/group-standings";
-import { prisma } from "@/lib/prisma";
 
 function getGroupStatusMap(
   matches: Array<{
@@ -100,23 +100,9 @@ function CompactTeamCell({
     flagUrl: string | null;
   };
 }) {
-  const displayFlagUrl = team.flagUrl ?? getDisplayFlagUrl(team.flagUrl, 40);
-  const flagEmoji = getFlagEmoji(team.flagUrl);
-
   return (
     <div className="flex min-w-0 items-center gap-1.5">
-      {displayFlagUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={displayFlagUrl}
-          alt={`Bandera de ${team.name}`}
-          className="size-4 shrink-0 rounded-[5px] bg-white object-contain p-0.5"
-        />
-      ) : (
-        <span className="flex size-4 shrink-0 items-center justify-center text-sm leading-none">
-          {flagEmoji ?? "?"}
-        </span>
-      )}
+      <FlagImage flagUrl={team.flagUrl} teamName={team.name} size="sm" />
       <span className="truncate text-xs font-bold">{getTeamCode(team.name)}</span>
     </div>
   );
@@ -124,31 +110,8 @@ function CompactTeamCell({
 
 export default async function WorldCupGroupStandingsPage() {
   const [teams, matches] = await Promise.all([
-    prisma.team.findMany({
-      where: {
-        groupCode: {
-          not: null,
-        },
-      },
-      orderBy: [
-        { groupCode: "asc" },
-        { name: "asc" },
-      ],
-    }),
-    prisma.match.findMany({
-      where: {
-        round: {
-          name: "Fase de grupos",
-        },
-      },
-      include: {
-        homeTeam: true,
-        awayTeam: true,
-      },
-      orderBy: {
-        startsAt: "asc",
-      },
-    }),
+    getCachedWorldCupTeams(),
+    getCachedGroupStageMatches(),
   ]);
 
   const standings = buildGroupStandings(teams, matches);

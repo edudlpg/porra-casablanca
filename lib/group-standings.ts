@@ -1,4 +1,4 @@
-import type { GroupCode, Match, Team } from "@prisma/client";
+import type { GroupCode, Team } from "@prisma/client";
 
 export type GroupStandingRow = {
   team: Pick<Team, "id" | "name" | "flagUrl" | "groupCode">;
@@ -21,7 +21,11 @@ export type BestThirdPlaceRow = GroupStandingRow & {
   groupCode: GroupCode;
 };
 
-type MatchWithTeams = Match & {
+type MatchWithTeams = {
+  homeTeamId: string;
+  awayTeamId: string;
+  homeScore: number | null;
+  awayScore: number | null;
   homeTeam: Pick<Team, "id" | "name" | "flagUrl" | "groupCode">;
   awayTeam: Pick<Team, "id" | "name" | "flagUrl" | "groupCode">;
 };

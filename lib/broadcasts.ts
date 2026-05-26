@@ -31,10 +31,10 @@ export function getDefaultBroadcastForTeams(homeTeam: string, awayTeam: string):
 export const broadcastLogoByPartner: Record<BroadcastPartner, { alt: string; src: string }> = {
   DAZN: {
     alt: "DAZN",
-    src: "/images/dazn-logo.jpg",
+    src: "/images/dazn-logo.svg",
   },
   RTVE: {
     alt: "RTVE",
-    src: "/images/rtve-logo.png",
+    src: "/images/rtve-logo.svg",
   },
 };

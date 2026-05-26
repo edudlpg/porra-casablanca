@@ -3,6 +3,7 @@
 import bcrypt from "bcryptjs";
 import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
+import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import {
@@ -88,15 +89,24 @@ export async function registerAction(formData: FormData) {
 
   const passwordHash = await bcrypt.hash(parsed.data.password, 10);
 
-  await prisma.user.create({
-    data: {
-      name: parsed.data.username,
-      username: parsed.data.username,
-      teamName: parsed.data.username,
-      email: null,
-      passwordHash,
-    },
-  });
+  try {
+    await prisma.user.create({
+      data: {
+        name: parsed.data.username,
+        username: parsed.data.username,
+        teamName: parsed.data.username,
+        email: null,
+        passwordHash,
+      },
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      await registerAuthFailure("register", [ip]);
+      redirect("/register?error=Ya existe una cuenta con ese usuario.");
+    }
+
+    throw error;
+  }
 
   await clearAuthRateLimit("register", [ip]);
 

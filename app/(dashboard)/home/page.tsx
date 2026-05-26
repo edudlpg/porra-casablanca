@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/layout/empty-state";
 import { MatchCard } from "@/components/matches/match-card";
 import { auth } from "@/lib/auth";
+import { getCachedAppConfig } from "@/lib/data-cache";
 import { buildRankingEntries } from "@/lib/ranking";
 import { prisma } from "@/lib/prisma";
 import type { RankingEntry } from "@/types";
@@ -44,13 +45,56 @@ export default async function HomePage() {
       orderBy: {
         startDate: "asc",
       },
+      select: {
+        id: true,
+        name: true,
+        startDate: true,
+      },
     }),
     prisma.match.findMany({
       where: upcomingMatchesWhere,
-      include: {
-        round: true,
-        homeTeam: true,
-        awayTeam: true,
+      select: {
+        id: true,
+        roundId: true,
+        homeTeamId: true,
+        awayTeamId: true,
+        winnerTeamId: true,
+        homeSlotLabel: true,
+        awaySlotLabel: true,
+        venueName: true,
+        venueCity: true,
+        startsAt: true,
+        homeScore: true,
+        awayScore: true,
+        broadcast: true,
+        isLocked: true,
+        createdAt: true,
+        round: {
+          select: {
+            id: true,
+            name: true,
+            unlockAt: true,
+            startDate: true,
+            endDate: true,
+            createdAt: true,
+          },
+        },
+        homeTeam: {
+          select: {
+            id: true,
+            name: true,
+            flagUrl: true,
+            groupCode: true,
+          },
+        },
+        awayTeam: {
+          select: {
+            id: true,
+            name: true,
+            flagUrl: true,
+            groupCode: true,
+          },
+        },
       },
       orderBy: {
         startsAt: "asc",
@@ -61,16 +105,25 @@ export default async function HomePage() {
       where: {
         role: "USER",
       },
-      include: {
-        predictions: true,
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        email: true,
+        teamName: true,
+        avatarUrl: true,
+        predictions: {
+          select: {
+            points: true,
+            scoreType: true,
+          },
+        },
       },
       orderBy: {
         createdAt: "asc",
       },
     }),
-    prisma.appConfig.findUnique({
-      where: { id: "singleton" },
-    }),
+    getCachedAppConfig(),
   ]);
 
   const pendingMatchesCount = nextRound
@@ -165,7 +218,13 @@ export default async function HomePage() {
           <h2 className="font-display text-xl font-bold text-slate-950">Próximos partidos</h2>
         </div>
         {upcomingMatches.length ? (
-          upcomingMatches.map((match) => <MatchCard key={match.id} match={match} />)
+          upcomingMatches.map((match, index) => (
+            <MatchCard
+              key={match.id}
+              match={match}
+              mediaLoading={index === 0 ? "eager" : "lazy"}
+            />
+          ))
         ) : (
           <EmptyState
             title="Sin próximos partidos"

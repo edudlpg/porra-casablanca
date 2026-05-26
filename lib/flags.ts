@@ -34,6 +34,16 @@ export function getDisplayFlagUrl(flagUrl?: string | null, width = 80) {
   return `https://flagcdn.com/w${width}/${flagCode}.png`;
 }
 
+export function getLocalFlagUrl(flagUrl?: string | null) {
+  const flagCode = extractFlagCode(flagUrl);
+
+  if (!flagCode) {
+    return null;
+  }
+
+  return `/flags/${flagCode}.png`;
+}
+
 export function getFlagEmoji(flagUrl?: string | null) {
   const flagCode = extractFlagCode(flagUrl);
 

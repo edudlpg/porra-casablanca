@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { extractFlagCode, getDisplayFlagUrl, getFlagEmoji } from "@/lib/flags";
+import { extractFlagCode, getDisplayFlagUrl, getFlagEmoji, getLocalFlagUrl } from "@/lib/flags";
 
 describe("flag helpers", () => {
   it("extrae el codigo desde la URL de FlagCDN", () => {
@@ -16,6 +16,11 @@ describe("flag helpers", () => {
   it("normaliza las banderas de FlagCDN a PNG para renderizado", () => {
     expect(getDisplayFlagUrl("https://flagcdn.com/es.svg")).toBe("https://flagcdn.com/w80/es.png");
     expect(getDisplayFlagUrl("https://flagcdn.com/w80/gb-eng.png", 160)).toBe("https://flagcdn.com/w160/gb-eng.png");
+  });
+
+  it("deriva la ruta local cuando reconoce el codigo de bandera", () => {
+    expect(getLocalFlagUrl("https://flagcdn.com/es.svg")).toBe("/flags/es.png");
+    expect(getLocalFlagUrl("https://flagcdn.com/w80/gb-eng.png")).toBe("/flags/gb-eng.png");
   });
 
   it("soporta banderas de subdivision usadas por Inglaterra y Escocia", () => {

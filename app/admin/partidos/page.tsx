@@ -18,12 +18,41 @@ export default async function AdminMatchesPage({
   const query = await searchParams;
   const [rounds, teams, matches] = await Promise.all([
     prisma.round.findMany({ orderBy: { startDate: "asc" } }),
-    prisma.team.findMany({ orderBy: { name: "asc" } }),
+    prisma.team.findMany({
+      select: {
+        id: true,
+        name: true,
+        flagUrl: true,
+        groupCode: true,
+      },
+      orderBy: { name: "asc" },
+    }),
     prisma.match.findMany({
-      include: {
-        round: true,
-        homeTeam: true,
-        awayTeam: true,
+      select: {
+        id: true,
+        roundId: true,
+        homeTeamId: true,
+        awayTeamId: true,
+        venueName: true,
+        venueCity: true,
+        startsAt: true,
+        broadcast: true,
+        isLocked: true,
+        round: {
+          select: {
+            name: true,
+          },
+        },
+        homeTeam: {
+          select: {
+            name: true,
+          },
+        },
+        awayTeam: {
+          select: {
+            name: true,
+          },
+        },
       },
       orderBy: { startsAt: "asc" },
     }),

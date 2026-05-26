@@ -8,9 +8,9 @@ type AvatarUploadFormProps = {
   action: (formData: FormData) => void;
 };
 
-const INITIAL_MAX_DIMENSION = 384;
-const MIN_DIMENSION = 128;
-const TARGET_MAX_BYTES = 220 * 1024;
+const INITIAL_MAX_DIMENSION = 256;
+const MIN_DIMENSION = 96;
+const TARGET_MAX_BYTES = 96 * 1024;
 const MIN_QUALITY = 0.42;
 
 function loadImage(file: File) {

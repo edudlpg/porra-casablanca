@@ -5,22 +5,11 @@ import { LocalizedDateTime } from "@/components/layout/localized-date-time";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { prisma } from "@/lib/prisma";
+import { getCachedRoundsWithMatchStatus } from "@/lib/data-cache";
 import { isMatchEditable, isRoundOpen, isRoundPredictionWindow } from "@/lib/utils";
 
 export default async function RoundsPage() {
-  const rounds = await prisma.round.findMany({
-    include: {
-      matches: {
-        orderBy: {
-          startsAt: "asc",
-        },
-      },
-    },
-    orderBy: {
-      startDate: "asc",
-    },
-  });
+  const rounds = await getCachedRoundsWithMatchStatus();
   const currentRound = rounds.find((round) =>
     isRoundPredictionWindow(round.unlockAt, round.startDate),
   );

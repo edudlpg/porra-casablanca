@@ -3,10 +3,13 @@ import type { Match, Prediction, Role, Round, ScoreType, Team, User } from "@pri
 export type AppRole = Role;
 export type AppScoreType = ScoreType;
 
+export type MatchTeam = Pick<Team, "id" | "name" | "flagUrl" | "groupCode">;
+export type MatchRound = Pick<Round, "id" | "name" | "unlockAt" | "startDate" | "endDate" | "createdAt">;
+
 export type MatchWithRelations = Match & {
-  round: Round;
-  homeTeam: Team;
-  awayTeam: Team;
+  round: MatchRound;
+  homeTeam: MatchTeam;
+  awayTeam: MatchTeam;
   predictions?: Prediction[];
 };
 

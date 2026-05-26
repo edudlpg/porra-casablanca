@@ -2,10 +2,11 @@
 
 import bcrypt from "bcryptjs";
 import { Role } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
+import { CACHE_TAGS } from "@/lib/data-cache";
 import { prisma } from "@/lib/prisma";
 import type { ResultActionState } from "@/lib/result-action-state";
 import { calculatePredictionScore } from "@/lib/scoring";
@@ -47,6 +48,10 @@ function buildResultActionState(
 }
 
 function refreshAdminScreens() {
+  revalidateTag(CACHE_TAGS.appConfig, "max");
+  revalidateTag(CACHE_TAGS.matches, "max");
+  revalidateTag(CACHE_TAGS.rounds, "max");
+  revalidateTag(CACHE_TAGS.teams, "max");
   revalidatePath("/admin");
   revalidatePath("/admin/ajustes");
   revalidatePath("/admin/contrasenas");
@@ -55,6 +60,7 @@ function refreshAdminScreens() {
   revalidatePath("/jornadas");
   revalidatePath("/clasificacion");
   revalidatePath("/mundial");
+  revalidatePath("/mundial/equipos");
   revalidatePath("/mundial/clasificacion-grupos");
   revalidatePath("/admin/jornadas");
   revalidatePath("/admin/partidos");

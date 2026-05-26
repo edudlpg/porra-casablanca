@@ -16,6 +16,7 @@ type MatchCardProps = {
   scoreLabel?: string;
   hasSavedPrediction?: boolean;
   subtitle?: string;
+  mediaLoading?: "eager" | "lazy";
 };
 
 export function MatchCard({
@@ -24,6 +25,7 @@ export function MatchCard({
   scoreLabel,
   hasSavedPrediction = false,
   subtitle,
+  mediaLoading = "lazy",
 }: MatchCardProps) {
   const hasResult = match.homeScore !== null && match.awayScore !== null;
 
@@ -44,7 +46,7 @@ export function MatchCard({
             <p className="mt-1 text-sm text-slate-500">{subtitle ?? match.round.name}</p>
           </div>
           <div className="flex flex-col items-end gap-2">
-            <BroadcastBadge broadcast={match.broadcast} />
+            <BroadcastBadge broadcast={match.broadcast} imageLoading={mediaLoading} />
             <div className="flex items-center gap-2">
               {match.isLocked && !hasResult ? (
                 <Badge variant="warning">
@@ -58,7 +60,7 @@ export function MatchCard({
 
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-center">
           <div className="rounded-[22px] border border-white/70 bg-white/70 px-3 py-4 shadow-[0_10px_26px_-18px_rgba(15,23,42,0.45)] backdrop-blur-[2px]">
-            <TeamBadge team={match.homeTeam} layout="stacked" />
+            <TeamBadge team={match.homeTeam} layout="stacked" imageLoading={mediaLoading} />
           </div>
           <div className="min-w-[6.5rem] space-y-1">
             <p className="text-center font-display text-2xl font-bold text-slate-950">
@@ -67,7 +69,7 @@ export function MatchCard({
             {scoreLabel ? <p className="text-center text-xs font-medium text-slate-500">{scoreLabel}</p> : null}
           </div>
           <div className="rounded-[22px] border border-white/70 bg-white/70 px-3 py-4 shadow-[0_10px_26px_-18px_rgba(15,23,42,0.45)] backdrop-blur-[2px]">
-            <TeamBadge team={match.awayTeam} layout="stacked" />
+            <TeamBadge team={match.awayTeam} layout="stacked" imageLoading={mediaLoading} />
           </div>
         </div>
 

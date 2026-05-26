@@ -2,11 +2,11 @@ import { notFound } from "next/navigation";
 import { Shirt } from "lucide-react";
 
 import { BackLink } from "@/components/layout/back-link";
+import { FlagImage } from "@/components/teams/flag-image";
 import { LocalizedDateTime } from "@/components/layout/localized-date-time";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { getDisplayFlagUrl, getFlagEmoji } from "@/lib/flags";
 import { prisma } from "@/lib/prisma";
 import { TEAM_GUIDE_BY_SLUG, getStarPlayerNumber } from "@/lib/world-cup-team-guide";
 
@@ -20,21 +20,9 @@ type TeamFlagProps = {
 };
 
 function TeamFlagName({ team }: TeamFlagProps) {
-  const displayFlagUrl = team.flagUrl ?? getDisplayFlagUrl(team.flagUrl, 64);
-  const flagEmoji = getFlagEmoji(team.flagUrl);
-
   return (
     <span className="inline-flex min-w-0 items-center gap-2">
-      {displayFlagUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={displayFlagUrl}
-          alt={`Bandera de ${team.name}`}
-          className="size-6 shrink-0 rounded-lg bg-white object-contain p-0.5"
-        />
-      ) : (
-        <span className="text-lg leading-none">{flagEmoji ?? "?"}</span>
-      )}
+      <FlagImage flagUrl={team.flagUrl} teamName={team.name} size="md" />
       <span className="min-w-0 truncate">{team.name}</span>
     </span>
   );
@@ -73,6 +61,12 @@ export default async function TeamGuideDetailPage({ params }: { params: Params }
     where: {
       name: guide.name,
     },
+    select: {
+      id: true,
+      name: true,
+      flagUrl: true,
+      groupCode: true,
+    },
   });
 
   if (!team?.groupCode) {
@@ -83,6 +77,12 @@ export default async function TeamGuideDetailPage({ params }: { params: Params }
     prisma.team.findMany({
       where: {
         groupCode: team.groupCode,
+      },
+      select: {
+        id: true,
+        name: true,
+        flagUrl: true,
+        groupCode: true,
       },
       orderBy: {
         name: "asc",
@@ -95,9 +95,27 @@ export default async function TeamGuideDetailPage({ params }: { params: Params }
         },
         OR: [{ homeTeamId: team.id }, { awayTeamId: team.id }],
       },
-      include: {
-        homeTeam: true,
-        awayTeam: true,
+      select: {
+        id: true,
+        homeTeamId: true,
+        awayTeamId: true,
+        startsAt: true,
+        homeTeam: {
+          select: {
+            id: true,
+            name: true,
+            flagUrl: true,
+            groupCode: true,
+          },
+        },
+        awayTeam: {
+          select: {
+            id: true,
+            name: true,
+            flagUrl: true,
+            groupCode: true,
+          },
+        },
       },
       orderBy: {
         startsAt: "asc",

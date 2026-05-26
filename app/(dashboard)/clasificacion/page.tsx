@@ -2,6 +2,7 @@ import { EmptyState } from "@/components/layout/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { RankingList } from "@/components/ranking/ranking-list";
 import { prisma } from "@/lib/prisma";
+import { getCachedAppConfig } from "@/lib/data-cache";
 import { buildRankingEntries } from "@/lib/ranking";
 import type { RankingEntry } from "@/types";
 
@@ -11,16 +12,25 @@ export default async function RankingPage() {
       where: {
         role: "USER",
       },
-      include: {
-        predictions: true,
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        email: true,
+        teamName: true,
+        avatarUrl: true,
+        predictions: {
+          select: {
+            points: true,
+            scoreType: true,
+          },
+        },
       },
       orderBy: {
         createdAt: "asc",
       },
     }),
-    prisma.appConfig.findUnique({
-      where: { id: "singleton" },
-    }),
+    getCachedAppConfig(),
   ]);
 
   const entries: RankingEntry[] = buildRankingEntries(users, config?.entryFee ?? 0);

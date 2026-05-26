@@ -65,25 +65,56 @@ export async function GET() {
 
   const [users, matches, predictions] = await Promise.all([
     prisma.user.findMany({
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        teamName: true,
+        role: true,
+        createdAt: true,
+      },
       orderBy: [{ role: "asc" }, { username: "asc" }, { name: "asc" }],
     }),
     prisma.match.findMany({
-      include: {
-        round: true,
-        homeTeam: true,
-        awayTeam: true,
-        winnerTeam: true,
+      select: {
+        id: true,
+        startsAt: true,
+        homeScore: true,
+        awayScore: true,
+        createdAt: true,
+        round: { select: { name: true } },
+        homeTeam: { select: { name: true } },
+        awayTeam: { select: { name: true } },
+        winnerTeam: { select: { name: true } },
       },
       orderBy: [{ startsAt: "asc" }],
     }),
     prisma.prediction.findMany({
-      include: {
-        user: true,
+      select: {
+        userId: true,
+        matchId: true,
+        predictedHomeScore: true,
+        predictedAwayScore: true,
+        points: true,
+        scoreType: true,
+        createdAt: true,
+        updatedAt: true,
+        user: {
+          select: {
+            username: true,
+            name: true,
+            teamName: true,
+            role: true,
+          },
+        },
         match: {
-          include: {
-            round: true,
-            homeTeam: true,
-            awayTeam: true,
+          select: {
+            startsAt: true,
+            homeScore: true,
+            awayScore: true,
+            round: { select: { name: true } },
+            homeTeam: { select: { name: true } },
+            awayTeam: { select: { name: true } },
           },
         },
       },

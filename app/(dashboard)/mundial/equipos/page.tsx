@@ -3,24 +3,14 @@ import Link from "next/link";
 import { BackLink } from "@/components/layout/back-link";
 import { EmptyState } from "@/components/layout/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
+import { FlagImage } from "@/components/teams/flag-image";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { getDisplayFlagUrl, getFlagEmoji } from "@/lib/flags";
-import { prisma } from "@/lib/prisma";
+import { getCachedWorldCupTeams } from "@/lib/data-cache";
 import { TEAM_GUIDE_BY_NAME, getTeamGuideSlug } from "@/lib/world-cup-team-guide";
 
 export default async function WorldCupTeamsGuidePage() {
-  const teams = await prisma.team.findMany({
-    where: {
-      groupCode: {
-        not: null,
-      },
-    },
-    orderBy: [
-      { groupCode: "asc" },
-      { name: "asc" },
-    ],
-  });
+  const teams = await getCachedWorldCupTeams();
 
   return (
     <div className="space-y-6">
@@ -36,8 +26,6 @@ export default async function WorldCupTeamsGuidePage() {
           {teams.map((team) => {
             const guide = TEAM_GUIDE_BY_NAME.get(team.name);
             const colors = guide?.colors ?? ["#0f172a", "#ffffff", "#64748b"];
-            const displayFlagUrl = getDisplayFlagUrl(team.flagUrl, 80);
-            const flagEmoji = getFlagEmoji(team.flagUrl);
 
             return (
               <Link
@@ -58,18 +46,12 @@ export default async function WorldCupTeamsGuidePage() {
                     <Badge className="absolute left-5 top-5 w-fit border-white/30 bg-white/18 text-white">
                       Grupo {team.groupCode}
                     </Badge>
-                    <div className="absolute right-5 top-5 flex size-12 items-center justify-center rounded-2xl bg-white/90 p-2 shadow-lg">
-                      {displayFlagUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={displayFlagUrl}
-                          alt={`Bandera de ${team.name}`}
-                          className="size-full object-contain"
-                        />
-                      ) : (
-                        <span className="text-3xl leading-none">{flagEmoji ?? "?"}</span>
-                      )}
-                    </div>
+                    <FlagImage
+                      flagUrl={team.flagUrl}
+                      teamName={team.name}
+                      size="lg"
+                      className="absolute right-5 top-5 shadow-lg"
+                    />
                     <div className="flex min-h-28 items-center pt-8">
                       <h2 className="text-wrap font-display text-xl font-bold leading-tight sm:text-2xl">
                         {team.name}

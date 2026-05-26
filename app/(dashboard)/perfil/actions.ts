@@ -7,7 +7,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formDataToObject, profileTeamNameSchema } from "@/lib/validations";
 
-const MAX_AVATAR_SIZE = 1024 * 1024;
+const MAX_AVATAR_SIZE = 256 * 1024;
 const ALLOWED_AVATAR_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 export async function saveProfileAvatarAction(formData: FormData) {
@@ -32,7 +32,7 @@ export async function saveProfileAvatarAction(formData: FormData) {
   }
 
   if (avatar.size > MAX_AVATAR_SIZE) {
-    redirect("/perfil?error=La foto debe pesar menos de 1 MB tras optimizarse.");
+    redirect("/perfil?error=La foto debe pesar menos de 256 KB tras optimizarse.");
   }
 
   const buffer = Buffer.from(await avatar.arrayBuffer());

@@ -5,9 +5,10 @@ import { broadcastLogoByPartner } from "@/lib/broadcasts";
 
 type BroadcastBadgeProps = {
   broadcast: BroadcastPartner;
+  imageLoading?: "eager" | "lazy";
 };
 
-export function BroadcastBadge({ broadcast }: BroadcastBadgeProps) {
+export function BroadcastBadge({ broadcast, imageLoading = "lazy" }: BroadcastBadgeProps) {
   const logo = broadcastLogoByPartner[broadcast];
 
   return (
@@ -17,6 +18,7 @@ export function BroadcastBadge({ broadcast }: BroadcastBadgeProps) {
         alt={logo.alt}
         width={48}
         height={18}
+        loading={imageLoading}
         className="h-4 w-auto object-contain"
       />
     </div>

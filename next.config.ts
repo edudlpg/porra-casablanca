@@ -8,6 +8,14 @@ const scriptSrc = [
 
 const nextConfig: NextConfig = {
   typedRoutes: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "flagcdn.com",
+      },
+    ],
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: "4mb",

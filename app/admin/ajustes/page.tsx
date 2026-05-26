@@ -7,7 +7,7 @@ import { FeedbackBanner } from "@/components/layout/feedback-banner";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { prisma } from "@/lib/prisma";
+import { getCachedAppConfig } from "@/lib/data-cache";
 
 type SearchParams = Promise<{ error?: string; success?: string }>;
 
@@ -17,9 +17,7 @@ export default async function AdminSettingsPage({
   searchParams: SearchParams;
 }) {
   const query = await searchParams;
-  const config = await prisma.appConfig.findUnique({
-    where: { id: "singleton" },
-  });
+  const config = await getCachedAppConfig();
 
   return (
     <div className="space-y-6">

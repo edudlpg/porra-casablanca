@@ -32,6 +32,13 @@ export default async function ProfilePage({
     where: {
       id: session.user.id,
     },
+    select: {
+      id: true,
+      name: true,
+      username: true,
+      teamName: true,
+      avatarUrl: true,
+    },
   });
 
   if (!user) {
@@ -64,7 +71,12 @@ export default async function ProfilePage({
           <div className="flex min-h-20 items-center gap-4">
             <Avatar className="size-20 rounded-full border-4 border-white shadow-[0_14px_34px_-18px_rgba(15,23,42,0.65)]">
               {user.avatarUrl ? (
-                <AvatarImage src={user.avatarUrl} alt={`Foto de ${displayName}`} />
+                <AvatarImage
+                  src={user.avatarUrl}
+                  alt={`Foto de ${displayName}`}
+                  loading="eager"
+                  decoding="async"
+                />
               ) : null}
               <AvatarFallback className="rounded-full text-lg font-bold">
                 {displayName.slice(0, 2).toUpperCase()}

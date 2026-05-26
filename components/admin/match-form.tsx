@@ -9,7 +9,7 @@ import { SubmitButton } from "@/components/layout/submit-button";
 type MatchFormProps = {
   action: (formData: FormData) => void;
   rounds: Round[];
-  teams: Team[];
+  teams: Array<Pick<Team, "id" | "name">>;
   defaultValues?: {
     id: string;
     roundId: string;

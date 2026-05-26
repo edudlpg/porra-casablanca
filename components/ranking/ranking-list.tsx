@@ -77,6 +77,8 @@ export function RankingList({ entries }: RankingListProps) {
                       <AvatarImage
                         src={entry.user.avatarUrl}
                         alt={`Foto de ${displayName}`}
+                        loading="lazy"
+                        decoding="async"
                       />
                     ) : null}
                     <AvatarFallback>{displayName.slice(0, 2).toUpperCase()}</AvatarFallback>

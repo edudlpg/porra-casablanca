@@ -39,25 +39,21 @@ export async function getRequestIp() {
 }
 
 async function getNormalizedBucket(action: AuthAction, key: string, now: Date) {
-  const bucket = await prisma.authRateLimit.findUnique({
+  const bucket = await prisma.authRateLimit.upsert({
     where: {
       action_key: {
         action,
         key,
       },
     },
+    create: {
+      action,
+      key,
+      attempts: 0,
+      windowStart: now,
+    },
+    update: {},
   });
-
-  if (!bucket) {
-    return prisma.authRateLimit.create({
-      data: {
-        action,
-        key,
-        attempts: 0,
-        windowStart: now,
-      },
-    });
-  }
 
   if (now.getTime() - bucket.windowStart.getTime() >= RATE_LIMIT_POLICIES[action].windowMs) {
     return prisma.authRateLimit.update({
