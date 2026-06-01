@@ -50,13 +50,13 @@ describe("buildRankingEntries", () => {
     );
 
     expect(entries.map((entry) => entry.user.name)).toEqual(["Ana", "Beto", "Carla", "Dani"]);
-    expect(entries[0]?.prizeAmount).toBe(10);
-    expect(entries[1]?.prizeAmount).toBe(20);
-    expect(entries[2]?.prizeAmount).toBe(10);
+    expect(entries[0]?.prizeAmount).toBe(28);
+    expect(entries[1]?.prizeAmount).toBe(8);
+    expect(entries[2]?.prizeAmount).toBe(4);
     expect(entries[3]?.prizeAmount).toBe(0);
   });
 
-  it("reparte de forma razonable cuando solo hay dos participantes", () => {
+  it("mantiene porcentajes del bote cuando solo hay dos participantes", () => {
     const entries = buildRankingEntries(
       [
         {
@@ -81,7 +81,7 @@ describe("buildRankingEntries", () => {
       10,
     );
 
-    expect(entries[0]?.prizeAmount).toBe(0);
-    expect(entries[1]?.prizeAmount).toBe(20);
+    expect(entries[0]?.prizeAmount).toBe(14);
+    expect(entries[1]?.prizeAmount).toBe(4);
   });
 });

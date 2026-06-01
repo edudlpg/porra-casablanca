@@ -49,6 +49,26 @@ function formatPrizeAmount(amount: number) {
   }).format(amount);
 }
 
+function getNoPrizeLabel(position: number, totalEntries: number) {
+  if (position === 4) {
+    return "Bizcocho de pera";
+  }
+
+  if (position === 5) {
+    return "Copazo en la CB";
+  }
+
+  if (position === 6) {
+    return "Domingo sin recoger";
+  }
+
+  if (position === totalEntries) {
+    return "Por determinar";
+  }
+
+  return "Aplauso";
+}
+
 export function RankingList({ entries }: RankingListProps) {
   const showPrizeBadges = entries.length >= 5;
 
@@ -57,6 +77,9 @@ export function RankingList({ entries }: RankingListProps) {
       {entries.map((entry) => {
         const styles = getPositionStyles(entry.position);
         const displayName = entry.user.teamName ?? entry.user.username ?? entry.user.name;
+        const noPrizeLabel = getNoPrizeLabel(entry.position, entries.length);
+        const badgeLabel =
+          entry.prizeAmount > 0 ? `Premio ${formatPrizeAmount(entry.prizeAmount)}` : noPrizeLabel;
 
         return (
           <Card key={entry.user.id} className={cn("relative overflow-hidden", styles.cardClass)}>
@@ -101,11 +124,9 @@ export function RankingList({ entries }: RankingListProps) {
               </div>
 
               <div className="flex justify-end">
-                {showPrizeBadges ? (
+                {showPrizeBadges && badgeLabel ? (
                   <Badge variant="secondary" className={styles.prizeClass}>
-                    {entry.prizeAmount > 0
-                      ? `Premio ${formatPrizeAmount(entry.prizeAmount)}`
-                      : "Aplauso"}
+                    {badgeLabel}
                   </Badge>
                 ) : null}
               </div>

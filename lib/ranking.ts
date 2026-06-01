@@ -8,19 +8,17 @@ type UserWithPredictions = Pick<User, "id" | "name" | "username" | "email" | "te
 
 function getPrizeAmount(position: number, participantCount: number, entryFee: number) {
   const totalPot = participantCount * entryFee;
-  const secondPrize = participantCount >= 2 ? entryFee * 2 : 0;
-  const thirdPrize = participantCount >= 3 ? entryFee : 0;
 
   if (position === 1) {
-    return Math.max(totalPot - secondPrize - thirdPrize, 0);
+    return totalPot * 0.7;
   }
 
   if (position === 2) {
-    return secondPrize;
+    return totalPot * 0.2;
   }
 
   if (position === 3) {
-    return thirdPrize;
+    return totalPot * 0.1;
   }
 
   return 0;
