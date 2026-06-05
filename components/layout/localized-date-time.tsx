@@ -1,3 +1,5 @@
+"use client";
+
 import { formatDateTime } from "@/lib/utils";
 
 type LocalizedDateTimeProps = {
@@ -6,9 +8,12 @@ type LocalizedDateTimeProps = {
 };
 
 export function LocalizedDateTime({ value, className }: LocalizedDateTimeProps) {
+  const dateTime = new Date(value).toISOString();
+  const formattedValue = typeof window === "undefined" ? "" : formatDateTime(value);
+
   return (
-    <time dateTime={new Date(value).toISOString()} className={className}>
-      {formatDateTime(value)}
+    <time dateTime={dateTime} className={className} suppressHydrationWarning>
+      {formattedValue}
     </time>
   );
 }

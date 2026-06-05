@@ -1,6 +1,30 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { isMatchEditable, isRoundInWindow, isRoundOpen, isRoundPredictionWindow } from "@/lib/utils";
+import { formatDateTime, isMatchEditable, isRoundInWindow, isRoundOpen, isRoundPredictionWindow } from "@/lib/utils";
+
+describe("date formatting", () => {
+  it("muestra la misma fecha absoluta en la zona horaria indicada por Intl", () => {
+    const openingMatchTime = "2026-06-11T19:00:00.000Z";
+
+    expect(
+      new Intl.DateTimeFormat("es-ES", {
+        dateStyle: "medium",
+        timeStyle: "short",
+        timeZone: "Atlantic/Canary",
+      }).format(new Date(openingMatchTime)),
+    ).toBe("11 jun 2026, 20:00");
+
+    expect(
+      new Intl.DateTimeFormat("es-ES", {
+        dateStyle: "medium",
+        timeStyle: "short",
+        timeZone: "UTC",
+      }).format(new Date(openingMatchTime)),
+    ).toBe("11 jun 2026, 19:00");
+
+    expect(formatDateTime(openingMatchTime)).toMatch(/11 jun 2026/);
+  });
+});
 
 describe("round availability helpers", () => {
   afterEach(() => {
