@@ -13,6 +13,17 @@ export default function WorldCupPage() {
       />
 
       <div className="space-y-3">
+        <Link href="/mundial/cuadro" className="block">
+          <Card className="transition hover:-translate-y-0.5">
+            <CardContent className="space-y-1 p-5">
+              <p className="font-bold text-slate-950">Cuadro</p>
+              <p className="text-sm text-slate-500">
+                Cruces finales del torneo desde dieciseisavos hasta la final
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
         <Link href="/mundial/clasificacion-grupos" className="block">
           <Card className="transition hover:-translate-y-0.5">
             <CardContent className="space-y-1 p-5">

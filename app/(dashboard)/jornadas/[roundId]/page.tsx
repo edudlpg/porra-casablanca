@@ -10,8 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatMatchVenue } from "@/lib/venues";
-import { isRoundPredictionWindow, isMatchEditable } from "@/lib/utils";
+import { cn, isRoundPredictionWindow, isMatchEditable } from "@/lib/utils";
 import { savePredictionAction } from "@/app/(dashboard)/jornadas/actions";
+import type { MatchPredictionResultGroup } from "@/types";
 
 const SCORE_TYPE_LABELS = {
   EXACT: "PLENO",
@@ -42,10 +43,104 @@ const SCORE_TYPE_BADGES = {
 type Params = Promise<{ roundId: string }>;
 type SearchParams = Promise<{ error?: string; success?: string }>;
 
+type PredictionForResultGroup = {
+  predictedHomeScore: number;
+  predictedAwayScore: number;
+  user: {
+    name: string;
+    username: string | null;
+    teamName: string | null;
+  };
+};
+
+function getParticipantName(prediction: PredictionForResultGroup) {
+  return prediction.user.teamName ?? prediction.user.username ?? prediction.user.name;
+}
+
+function buildPredictionResultGroups(
+  predictions: PredictionForResultGroup[],
+): MatchPredictionResultGroup[] {
+  const groups = new Map<
+    string,
+    {
+      homeScore: number;
+      awayScore: number;
+      participantNames: string[];
+    }
+  >();
+
+  for (const prediction of predictions) {
+    const score = `${prediction.predictedHomeScore}-${prediction.predictedAwayScore}`;
+    const existingGroup = groups.get(score);
+
+    if (existingGroup) {
+      existingGroup.participantNames.push(getParticipantName(prediction));
+      continue;
+    }
+
+    groups.set(score, {
+      homeScore: prediction.predictedHomeScore,
+      awayScore: prediction.predictedAwayScore,
+      participantNames: [getParticipantName(prediction)],
+    });
+  }
+
+  return Array.from(groups.entries())
+    .map(([score, group]) => ({
+      score,
+      participantNames: group.participantNames.sort((firstName, secondName) =>
+        firstName.localeCompare(secondName, "es"),
+      ),
+      homeScore: group.homeScore,
+      awayScore: group.awayScore,
+    }))
+    .sort((firstGroup, secondGroup) => {
+      const getOutcomeRank = (homeScore: number, awayScore: number) => {
+        if (homeScore > awayScore) {
+          return 0;
+        }
+
+        if (homeScore === awayScore) {
+          return 1;
+        }
+
+        return 2;
+      };
+
+      const firstOutcomeRank = getOutcomeRank(firstGroup.homeScore, firstGroup.awayScore);
+      const secondOutcomeRank = getOutcomeRank(secondGroup.homeScore, secondGroup.awayScore);
+
+      if (firstOutcomeRank !== secondOutcomeRank) {
+        return firstOutcomeRank - secondOutcomeRank;
+      }
+
+      if (firstOutcomeRank === 0) {
+        return (
+          secondGroup.homeScore - secondGroup.awayScore -
+          (firstGroup.homeScore - firstGroup.awayScore)
+        );
+      }
+
+      if (firstOutcomeRank === 1) {
+        return secondGroup.homeScore - firstGroup.homeScore;
+      }
+
+      return (
+        firstGroup.awayScore - firstGroup.homeScore -
+        (secondGroup.awayScore - secondGroup.homeScore)
+      );
+    })
+    .map(({ score, participantNames }) => ({
+      score,
+      participantNames,
+    }));
+}
+
 function PredictionSummary({
   currentPrediction,
   hasResult,
   unlockAt,
+  reserveResultButtonSpace = false,
 }: {
   currentPrediction?: {
     predictedHomeScore: number;
@@ -55,6 +150,7 @@ function PredictionSummary({
   };
   hasResult: boolean;
   unlockAt: Date;
+  reserveResultButtonSpace?: boolean;
 }) {
   const resolvedScoreType =
     currentPrediction?.scoreType && currentPrediction.scoreType !== "PENDING"
@@ -85,7 +181,7 @@ function PredictionSummary({
             : "Sin porra"}
         </p>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className={cn("flex flex-wrap gap-2", reserveResultButtonSpace && "pr-36")}>
         {currentPrediction ? (
           <>
             <Badge variant="secondary">{currentPrediction.points} PTS</Badge>
@@ -179,9 +275,6 @@ export default async function RoundDetailPage({
             },
           },
           predictions: {
-            where: {
-              userId: session.user.id,
-            },
             select: {
               id: true,
               userId: true,
@@ -192,6 +285,13 @@ export default async function RoundDetailPage({
               scoreType: true,
               createdAt: true,
               updatedAt: true,
+              user: {
+                select: {
+                  name: true,
+                  username: true,
+                  teamName: true,
+                },
+              },
             },
           },
         },
@@ -206,13 +306,14 @@ export default async function RoundDetailPage({
     notFound();
   }
 
+  const now = new Date();
   const currentRound = await prisma.round.findFirst({
     where: {
       unlockAt: {
-        lte: new Date(),
+        lte: now,
       },
       startDate: {
-        gt: new Date(),
+        gt: now,
       },
     },
     orderBy: {
@@ -237,6 +338,12 @@ export default async function RoundDetailPage({
       <div className="space-y-4">
         {round.matches.map((match, index) => {
           const effectiveMatch = isCurrentRound ? match : { ...match, isLocked: true };
+          const currentPrediction = match.predictions.find(
+            (prediction) => prediction.userId === session.user.id,
+          );
+          const hasResult = match.homeScore !== null && match.awayScore !== null;
+          const canRevealPredictionResults =
+            effectiveMatch.isLocked && (match.round.startDate <= now || hasResult);
           const editable = isMatchEditable(
             match.startsAt,
             effectiveMatch.isLocked,
@@ -248,12 +355,17 @@ export default async function RoundDetailPage({
             <MatchCard
               key={match.id}
               match={effectiveMatch}
-              hasSavedPrediction={Boolean(match.predictions[0])}
+              hasSavedPrediction={Boolean(currentPrediction)}
               subtitle={formatMatchVenue(match)}
               mediaLoading={index === 0 ? "eager" : "lazy"}
+              predictionResultGroups={
+                canRevealPredictionResults
+                  ? buildPredictionResultGroups(match.predictions)
+                  : undefined
+              }
               scoreLabel={
-                match.predictions[0] && editable
-                  ? `Tu porra: ${match.predictions[0].predictedHomeScore}-${match.predictions[0].predictedAwayScore}`
+                currentPrediction && editable
+                  ? `Tu porra: ${currentPrediction.predictedHomeScore}-${currentPrediction.predictedAwayScore}`
                   : undefined
               }
             >
@@ -262,13 +374,14 @@ export default async function RoundDetailPage({
                   action={savePredictionAction}
                   match={effectiveMatch}
                   roundId={round.id}
-                  currentPrediction={match.predictions[0]}
+                  currentPrediction={currentPrediction}
                 />
               ) : (
                 <PredictionSummary
-                  currentPrediction={match.predictions[0]}
-                  hasResult={match.homeScore !== null && match.awayScore !== null}
+                  currentPrediction={currentPrediction}
+                  hasResult={hasResult}
                   unlockAt={match.round.unlockAt}
+                  reserveResultButtonSpace={canRevealPredictionResults}
                 />
               )}
             </MatchCard>

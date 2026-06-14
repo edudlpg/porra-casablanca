@@ -13,6 +13,11 @@ export type MatchWithRelations = Match & {
   predictions?: Prediction[];
 };
 
+export type MatchPredictionResultGroup = {
+  score: string;
+  participantNames: string[];
+};
+
 export type RankingEntry = {
   position: number;
   user: Pick<User, "id" | "name" | "username" | "email" | "teamName" | "avatarUrl">;

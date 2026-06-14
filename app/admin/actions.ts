@@ -60,6 +60,7 @@ function refreshAdminScreens() {
   revalidatePath("/jornadas");
   revalidatePath("/clasificacion");
   revalidatePath("/mundial");
+  revalidatePath("/mundial/cuadro");
   revalidatePath("/mundial/equipos");
   revalidatePath("/mundial/clasificacion-grupos");
   revalidatePath("/admin/jornadas");
