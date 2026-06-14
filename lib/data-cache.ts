@@ -81,6 +81,51 @@ export const getCachedGroupStageMatches = unstable_cache(
   { revalidate: 300, tags: [CACHE_TAGS.matches, CACHE_TAGS.teams] },
 );
 
+export const getCachedKnockoutBracketMatches = unstable_cache(
+  () =>
+    prisma.match.findMany({
+      where: {
+        round: {
+          name: {
+            in: [
+              "Dieciseisavos de final",
+              "Octavos de final",
+              "Cuartos de final",
+              "Semifinales",
+              "Final",
+            ],
+          },
+        },
+      },
+      select: {
+        id: true,
+        homeSlotLabel: true,
+        awaySlotLabel: true,
+        startsAt: true,
+        round: {
+          select: {
+            name: true,
+          },
+        },
+        homeTeam: {
+          select: {
+            name: true,
+          },
+        },
+        awayTeam: {
+          select: {
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        startsAt: "asc",
+      },
+    }),
+  ["knockout-bracket-matches"],
+  { revalidate: 300, tags: [CACHE_TAGS.matches, CACHE_TAGS.teams] },
+);
+
 export const getCachedRoundsWithMatchStatus = unstable_cache(
   () =>
     prisma.round.findMany({

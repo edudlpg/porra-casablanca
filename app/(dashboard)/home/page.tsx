@@ -32,24 +32,27 @@ export default async function HomePage() {
     startsAt: { gt: now },
   } as const;
 
-  const nextRound = await prisma.round.findFirst({
-    where: {
-      unlockAt: {
-        lte: now,
+  const [nextRound, totalRounds] = await Promise.all([
+    prisma.round.findFirst({
+      where: {
+        unlockAt: {
+          lte: now,
+        },
+        startDate: {
+          gt: now,
+        },
       },
-      startDate: {
-        gt: now,
+      orderBy: {
+        startDate: "asc",
       },
-    },
-    orderBy: {
-      startDate: "asc",
-    },
-    select: {
-      id: true,
-      name: true,
-      startDate: true,
-    },
-  });
+      select: {
+        id: true,
+        name: true,
+        startDate: true,
+      },
+    }),
+    prisma.round.count(),
+  ]);
 
   const upcomingMatches = await prisma.match.findMany({
     where: upcomingMatchesWhere,
@@ -207,7 +210,8 @@ export default async function HomePage() {
           <div>
             <p className="text-xs uppercase tracking-[0.18em] text-cyan-100">Próxima jornada</p>
             <h2 className="mt-2 font-display text-2xl font-bold">
-              {nextRound?.name ?? "Aún no hay jornadas creadas"}
+              {nextRound?.name ??
+                (totalRounds > 0 ? "No hay jornadas abiertas" : "Aún no hay jornadas creadas")}
             </h2>
           </div>
           {nextRound ? <Countdown target={nextRound.startDate} initialNow={initialCountdownNow} /> : null}
