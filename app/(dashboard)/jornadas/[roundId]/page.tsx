@@ -3,14 +3,23 @@ import { notFound } from "next/navigation";
 import { BackLink } from "@/components/layout/back-link";
 import { FeedbackBanner } from "@/components/layout/feedback-banner";
 import { LocalizedDateTime } from "@/components/layout/localized-date-time";
+import { EmptyState } from "@/components/layout/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
+import { MatchDayNavigator } from "@/components/matches/match-day-navigator";
 import { MatchCard } from "@/components/matches/match-card";
 import { PredictionForm } from "@/components/predictions/prediction-form";
 import { Badge } from "@/components/ui/badge";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatMatchVenue } from "@/lib/venues";
-import { cn, isRoundPredictionWindow, isMatchEditable } from "@/lib/utils";
+import {
+  cn,
+  formatDateParam,
+  getDateParamRange,
+  isRoundPredictionWindow,
+  isMatchEditable,
+  normalizeDateParam,
+} from "@/lib/utils";
 import { savePredictionAction } from "@/app/(dashboard)/jornadas/actions";
 import type { MatchPredictionResultGroup } from "@/types";
 
@@ -41,7 +50,7 @@ const SCORE_TYPE_BADGES = {
 } as const;
 
 type Params = Promise<{ roundId: string }>;
-type SearchParams = Promise<{ error?: string; success?: string }>;
+type SearchParams = Promise<{ date?: string; error?: string; success?: string }>;
 
 type PredictionForResultGroup = {
   predictedHomeScore: number;
@@ -222,6 +231,24 @@ export default async function RoundDetailPage({
     return null;
   }
 
+  const firstRoundMatch = await prisma.match.findFirst({
+    where: { roundId },
+    select: {
+      startsAt: true,
+    },
+    orderBy: {
+      startsAt: "asc",
+    },
+  });
+  const todayDate = formatDateParam();
+  const firstRoundMatchDate = firstRoundMatch
+    ? formatDateParam(firstRoundMatch.startsAt)
+    : null;
+  const defaultSelectedDate =
+    firstRoundMatchDate && todayDate < firstRoundMatchDate ? firstRoundMatchDate : todayDate;
+  const selectedDate = query.date ?? defaultSelectedDate;
+  const selectedDateRange = getDateParamRange(normalizeDateParam(selectedDate));
+
   const round = await prisma.round.findUnique({
     where: { id: roundId },
     select: {
@@ -232,6 +259,12 @@ export default async function RoundDetailPage({
       endDate: true,
       createdAt: true,
       matches: {
+        where: {
+          startsAt: {
+            gte: selectedDateRange.start,
+            lt: selectedDateRange.end,
+          },
+        },
         select: {
           id: true,
           roundId: true,
@@ -335,59 +368,71 @@ export default async function RoundDetailPage({
       {query.error ? <FeedbackBanner type="error" message={query.error} /> : null}
       {query.success ? <FeedbackBanner type="success" message={query.success} /> : null}
 
-      <div className="space-y-4">
-        {round.matches.map((match, index) => {
-          const effectiveMatch = isCurrentRound ? match : { ...match, isLocked: true };
-          const currentPrediction = match.predictions.find(
-            (prediction) => prediction.userId === session.user.id,
-          );
-          const hasResult = match.homeScore !== null && match.awayScore !== null;
-          const canRevealPredictionResults =
-            effectiveMatch.isLocked && (match.round.startDate <= now || hasResult);
-          const editable = isMatchEditable(
-            match.startsAt,
-            effectiveMatch.isLocked,
-            match.round.unlockAt,
-            match.round.startDate,
-          );
+      <MatchDayNavigator
+        basePath={`/jornadas/${round.id}`}
+        selectedDate={normalizeDateParam(selectedDate)}
+      />
 
-          return (
-            <MatchCard
-              key={match.id}
-              match={effectiveMatch}
-              hasSavedPrediction={Boolean(currentPrediction)}
-              subtitle={formatMatchVenue(match)}
-              mediaLoading={index === 0 ? "eager" : "lazy"}
-              predictionResultGroups={
-                canRevealPredictionResults
-                  ? buildPredictionResultGroups(match.predictions)
-                  : undefined
-              }
-              scoreLabel={
-                currentPrediction && editable
-                  ? `Tu porra: ${currentPrediction.predictedHomeScore}-${currentPrediction.predictedAwayScore}`
-                  : undefined
-              }
-            >
-              {editable ? (
-                <PredictionForm
-                  action={savePredictionAction}
-                  match={effectiveMatch}
-                  roundId={round.id}
-                  currentPrediction={currentPrediction}
-                />
-              ) : (
-                <PredictionSummary
-                  currentPrediction={currentPrediction}
-                  hasResult={hasResult}
-                  unlockAt={match.round.unlockAt}
-                  reserveResultButtonSpace={canRevealPredictionResults}
-                />
-              )}
-            </MatchCard>
-          );
-        })}
-      </div>
+      {round.matches.length > 0 ? (
+        <div className="space-y-4">
+          {round.matches.map((match, index) => {
+            const effectiveMatch = isCurrentRound ? match : { ...match, isLocked: true };
+            const currentPrediction = match.predictions.find(
+              (prediction) => prediction.userId === session.user.id,
+            );
+            const hasResult = match.homeScore !== null && match.awayScore !== null;
+            const canRevealPredictionResults =
+              effectiveMatch.isLocked && (match.round.startDate <= now || hasResult);
+            const editable = isMatchEditable(
+              match.startsAt,
+              effectiveMatch.isLocked,
+              match.round.unlockAt,
+              match.round.startDate,
+            );
+
+            return (
+              <MatchCard
+                key={match.id}
+                match={effectiveMatch}
+                hasSavedPrediction={Boolean(currentPrediction)}
+                subtitle={formatMatchVenue(match)}
+                mediaLoading={index === 0 ? "eager" : "lazy"}
+                predictionResultGroups={
+                  canRevealPredictionResults
+                    ? buildPredictionResultGroups(match.predictions)
+                    : undefined
+                }
+                scoreLabel={
+                  currentPrediction && editable
+                    ? `Tu porra: ${currentPrediction.predictedHomeScore}-${currentPrediction.predictedAwayScore}`
+                    : undefined
+                }
+              >
+                {editable ? (
+                  <PredictionForm
+                    action={savePredictionAction}
+                    match={effectiveMatch}
+                    roundId={round.id}
+                    currentPrediction={currentPrediction}
+                  />
+                ) : (
+                  <PredictionSummary
+                    currentPrediction={currentPrediction}
+                    hasResult={hasResult}
+                    unlockAt={match.round.unlockAt}
+                    reserveResultButtonSpace={canRevealPredictionResults}
+                  />
+                )}
+              </MatchCard>
+            );
+          })}
+        </div>
+      ) : (
+        <EmptyState
+          title="No hay partidos este día"
+          description="Usa las flechas de fecha para moverte al día anterior o siguiente de esta fase."
+        />
+      )}
     </div>
   );
 }

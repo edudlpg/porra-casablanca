@@ -9,10 +9,10 @@ type LocalizedDateTimeProps = {
 
 export function LocalizedDateTime({ value, className }: LocalizedDateTimeProps) {
   const dateTime = new Date(value).toISOString();
-  const formattedValue = typeof window === "undefined" ? "" : formatDateTime(value);
+  const formattedValue = formatDateTime(value, "Atlantic/Canary");
 
   return (
-    <time dateTime={dateTime} className={className} suppressHydrationWarning>
+    <time dateTime={dateTime} className={className}>
       {formattedValue}
     </time>
   );

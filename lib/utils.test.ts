@@ -1,6 +1,16 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { formatDateTime, isMatchEditable, isRoundInWindow, isRoundOpen, isRoundPredictionWindow } from "@/lib/utils";
+import {
+  addDaysToDateParam,
+  formatDateParam,
+  formatDateTime,
+  getDateParamRange,
+  isMatchEditable,
+  isRoundInWindow,
+  isRoundOpen,
+  isRoundPredictionWindow,
+  normalizeDateParam,
+} from "@/lib/utils";
 
 describe("date formatting", () => {
   it("muestra la misma fecha absoluta en la zona horaria indicada por Intl", () => {
@@ -23,6 +33,37 @@ describe("date formatting", () => {
     ).toBe("11 jun 2026, 19:00");
 
     expect(formatDateTime(openingMatchTime)).toMatch(/11 jun 2026/);
+  });
+});
+
+describe("match day helpers", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("obtiene la fecha local de la aplicación para el día por defecto", () => {
+    expect(formatDateParam(new Date("2026-06-16T23:30:00.000Z"))).toBe("2026-06-17");
+  });
+
+  it("valida y normaliza el parámetro de fecha", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-06-17T08:00:00.000Z"));
+
+    expect(normalizeDateParam("2026-06-11")).toBe("2026-06-11");
+    expect(normalizeDateParam("2026-02-31")).toBe("2026-06-17");
+    expect(normalizeDateParam("invalid")).toBe("2026-06-17");
+  });
+
+  it("navega entre días con formato estable", () => {
+    expect(addDaysToDateParam("2026-06-11", -1)).toBe("2026-06-10");
+    expect(addDaysToDateParam("2026-06-30", 1)).toBe("2026-07-01");
+  });
+
+  it("calcula el rango UTC de un día en la zona local de la aplicación", () => {
+    const range = getDateParamRange("2026-06-17");
+
+    expect(range.start.toISOString()).toBe("2026-06-16T23:00:00.000Z");
+    expect(range.end.toISOString()).toBe("2026-06-17T23:00:00.000Z");
   });
 });
 
