@@ -1,5 +1,7 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
+
 import { formatDateTime } from "@/lib/utils";
 
 type LocalizedDateTimeProps = {
@@ -7,9 +9,17 @@ type LocalizedDateTimeProps = {
   className?: string;
 };
 
+function subscribeToTimeZoneChanges() {
+  return () => {};
+}
+
 export function LocalizedDateTime({ value, className }: LocalizedDateTimeProps) {
   const dateTime = new Date(value).toISOString();
-  const formattedValue = formatDateTime(value, "Atlantic/Canary");
+  const formattedValue = useSyncExternalStore(
+    subscribeToTimeZoneChanges,
+    () => formatDateTime(value),
+    () => formatDateTime(value, "Atlantic/Canary"),
+  );
 
   return (
     <time dateTime={dateTime} className={className}>
