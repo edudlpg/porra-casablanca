@@ -92,6 +92,7 @@ export const getCachedKnockoutBracketMatches = unstable_cache(
               "Octavos de final",
               "Cuartos de final",
               "Semifinales",
+              "Tercer puesto",
               "Final",
             ],
           },
@@ -110,11 +111,13 @@ export const getCachedKnockoutBracketMatches = unstable_cache(
         homeTeam: {
           select: {
             name: true,
+            flagUrl: true,
           },
         },
         awayTeam: {
           select: {
             name: true,
+            flagUrl: true,
           },
         },
       },
