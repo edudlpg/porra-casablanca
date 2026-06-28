@@ -1,12 +1,14 @@
 import { EmptyState } from "@/components/layout/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { RankingList } from "@/components/ranking/ranking-list";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getCachedAppConfig } from "@/lib/data-cache";
 import { buildRankingEntries } from "@/lib/ranking";
 import type { RankingEntry } from "@/types";
 
 export default async function RankingPage() {
+  const session = await auth();
   const users = await prisma.user.findMany({
     where: {
       role: "USER",
@@ -41,7 +43,7 @@ export default async function RankingPage() {
       />
 
       {entries.length ? (
-        <RankingList entries={entries} />
+        <RankingList entries={entries} currentUserId={session?.user.id} />
       ) : (
         <EmptyState
           title="Aún no hay clasificación"

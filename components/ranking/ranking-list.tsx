@@ -1,12 +1,17 @@
+"use client";
+
+import { type CSSProperties, useState } from "react";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CardCornerGraphic } from "@/components/ui/card-corner-graphic";
-import { Badge } from "@/components/ui/badge";
+import { badgeVariants } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { RankingEntry } from "@/types";
 
 type RankingListProps = {
   entries: RankingEntry[];
+  currentUserId?: string;
 };
 
 function getPositionStyles(position: number) {
@@ -69,8 +74,67 @@ function getNoPrizeLabel(position: number, totalEntries: number) {
   return "Aplauso";
 }
 
-export function RankingList({ entries }: RankingListProps) {
+function getPrizeSymbol(position: number, prizeAmount: number, noPrizeLabel: string) {
+  if (prizeAmount > 0) {
+    if (position === 1) {
+      return "🥇";
+    }
+
+    if (position === 2) {
+      return "🥈";
+    }
+
+    return "🥉";
+  }
+
+  if (noPrizeLabel === "Bizcocho de pera") {
+    return "🍐";
+  }
+
+  if (noPrizeLabel === "Copazo en la CB") {
+    return "🥃";
+  }
+
+  if (noPrizeLabel === "Domingo sin recoger") {
+    return "😴";
+  }
+
+  return "👏";
+}
+
+const celebrationParticles = [
+  { x: "-46px", y: "-82px", rotate: "-22deg", delay: "0ms" },
+  { x: "-24px", y: "-106px", rotate: "18deg", delay: "30ms" },
+  { x: "0px", y: "-92px", rotate: "-8deg", delay: "60ms" },
+  { x: "25px", y: "-112px", rotate: "24deg", delay: "90ms" },
+  { x: "48px", y: "-78px", rotate: "-16deg", delay: "120ms" },
+  { x: "-12px", y: "-132px", rotate: "10deg", delay: "150ms" },
+] as const;
+
+function PrizeCelebration({ symbol }: { symbol: string }) {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute bottom-8 right-6 z-20">
+      {celebrationParticles.map((particle, index) => (
+        <span
+          key={`${symbol}-${index}`}
+          className="ranking-prize-spark absolute text-xl drop-shadow-sm"
+          style={{
+            "--spark-x": particle.x,
+            "--spark-y": particle.y,
+            "--spark-rotate": particle.rotate,
+            animationDelay: particle.delay,
+          } as CSSProperties}
+        >
+          {symbol}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+export function RankingList({ entries, currentUserId }: RankingListProps) {
   const showPrizeBadges = entries.length >= 5;
+  const [celebrationKey, setCelebrationKey] = useState<string | null>(null);
 
   return (
     <div className="space-y-3">
@@ -80,10 +144,23 @@ export function RankingList({ entries }: RankingListProps) {
         const noPrizeLabel = getNoPrizeLabel(entry.position, entries.length);
         const badgeLabel =
           entry.prizeAmount > 0 ? `Premio ${formatPrizeAmount(entry.prizeAmount)}` : noPrizeLabel;
+        const isCurrentUser = entry.user.id === currentUserId;
+        const prizeSymbol = getPrizeSymbol(entry.position, entry.prizeAmount, noPrizeLabel);
 
         return (
-          <Card key={entry.user.id} className={cn("relative overflow-hidden", styles.cardClass)}>
+          <Card
+            key={entry.user.id}
+            className={cn(
+              "relative overflow-hidden",
+              styles.cardClass,
+              isCurrentUser &&
+                "border-emerald-300/90 bg-emerald-50/85 shadow-[0_18px_50px_-24px_rgba(5,150,105,0.45)]",
+            )}
+          >
             <CardCornerGraphic className="opacity-90" />
+            {celebrationKey === entry.user.id ? (
+              <PrizeCelebration key={`${entry.user.id}-${prizeSymbol}`} symbol={prizeSymbol} />
+            ) : null}
             <CardContent className="relative z-10 space-y-3 p-5">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-3">
@@ -108,9 +185,16 @@ export function RankingList({ entries }: RankingListProps) {
                   </Avatar>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-slate-950">
-                    {displayName}
-                  </p>
+                  <div className="flex min-w-0 items-center gap-2">
+                    <p className="truncate text-sm font-semibold text-slate-950">
+                      {displayName}
+                    </p>
+                    {isCurrentUser ? (
+                      <span className="shrink-0 rounded-full border border-emerald-200 bg-emerald-100 px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-emerald-800">
+                        Tú
+                      </span>
+                    ) : null}
+                  </div>
                   <p className="mt-1 text-xs uppercase tracking-[0.14em] text-slate-500">
                     P {entry.exactHits} · D {entry.goalDifferenceHits} · S {entry.finalResultHits}
                   </p>
@@ -125,9 +209,21 @@ export function RankingList({ entries }: RankingListProps) {
 
               <div className="flex justify-end">
                 {showPrizeBadges && badgeLabel ? (
-                  <Badge variant="secondary" className={styles.prizeClass}>
+                  <button
+                    type="button"
+                    className={cn(
+                      badgeVariants({ variant: "secondary" }),
+                      "relative transition active:scale-95",
+                      styles.prizeClass,
+                    )}
+                    onClick={() => {
+                      setCelebrationKey(null);
+                      window.setTimeout(() => setCelebrationKey(entry.user.id), 0);
+                    }}
+                    aria-label={`Celebrar ${badgeLabel} de ${displayName}`}
+                  >
                     {badgeLabel}
-                  </Badge>
+                  </button>
                 ) : null}
               </div>
             </CardContent>
