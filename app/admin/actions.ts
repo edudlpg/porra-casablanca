@@ -11,6 +11,7 @@ import { prisma } from "@/lib/prisma";
 import type { ResultActionState } from "@/lib/result-action-state";
 import { calculatePredictionScore } from "@/lib/scoring";
 import { synchronizeTournamentProgression } from "@/lib/tournament-progression";
+import { synchronizeWorldCupFixtureSchedule } from "@/lib/world-cup-schedule-sync";
 import {
   adminPasswordResetSchema,
   adminUserDeleteSchema,
@@ -328,30 +329,47 @@ export async function saveResultAction(
 export async function recalculateScoresAction() {
   await requireAdmin();
 
+  await prisma.$transaction((tx) => synchronizeWorldCupFixtureSchedule(tx));
+  await prisma.$transaction((tx) => synchronizeTournamentProgression(tx));
+
   const predictions = await prisma.prediction.findMany({
+    where: {
+      match: {
+        homeScore: {
+          not: null,
+        },
+        awayScore: {
+          not: null,
+        },
+      },
+    },
     include: {
       match: true,
     },
   });
 
-  await prisma.$transaction(
-    predictions
-      .filter((prediction) => prediction.match.homeScore !== null && prediction.match.awayScore !== null)
-      .map((prediction) => {
-        const scored = calculatePredictionScore(
-          prediction.predictedHomeScore,
-          prediction.predictedAwayScore,
-          prediction.match.homeScore ?? 0,
-          prediction.match.awayScore ?? 0,
-        );
+  const scoreUpdates = predictions.map((prediction) => {
+    const scored = calculatePredictionScore(
+      prediction.predictedHomeScore,
+      prediction.predictedAwayScore,
+      prediction.match.homeScore ?? 0,
+      prediction.match.awayScore ?? 0,
+    );
 
-        return prisma.prediction.update({
-          where: { id: prediction.id },
-          data: scored,
-        });
-      }),
-  );
+    return prisma.prediction.update({
+      where: {
+        id: prediction.id,
+      },
+      data: scored,
+    });
+  });
+
+  const batchSize = 50;
+
+  for (let start = 0; start < scoreUpdates.length; start += batchSize) {
+    await prisma.$transaction(scoreUpdates.slice(start, start + batchSize));
+  }
 
   refreshAdminScreens();
-  redirect("/admin/resultados?success=Puntuaciones recalculadas.");
+  redirect("/admin/resultados?success=Puntuaciones recalculadas, horarios y cruces sincronizados.");
 }

@@ -1,6 +1,6 @@
 import type { GroupCode, Match, Prediction, PrismaClient, ScoreType, Team } from "@prisma/client";
 
-import { buildGroupStandings } from "@/lib/group-standings";
+import { buildGroupStandings, compareStandingRows } from "@/lib/group-standings";
 import {
   THIRD_PLACE_OPTION_ASSIGNMENTS,
   THIRD_PLACE_OPTION_BY_GROUP_KEY,
@@ -36,32 +36,16 @@ const predictionResetData: Pick<Prediction, "points" | "scoreType"> = {
   scoreType: "PENDING" satisfies ScoreType,
 };
 
-function buildFixtureSignature(roundName: string, startsAt: Date, homeSlotLabel: string, awaySlotLabel: string) {
-  return `${roundName}|||${startsAt.toISOString()}|||${homeSlotLabel}|||${awaySlotLabel}`;
+function buildFixtureSignature(roundName: string, homeSlotLabel: string, awaySlotLabel: string) {
+  return `${roundName}|||${homeSlotLabel}|||${awaySlotLabel}`;
 }
 
 const WORLD_CUP_MATCH_NUMBER_BY_SIGNATURE = new Map(
   worldCup2026Fixtures.map((fixture, index) => [
-    buildFixtureSignature(fixture.roundName, fixture.startsAt, fixture.homeTeam, fixture.awayTeam),
+    buildFixtureSignature(fixture.roundName, fixture.homeTeam, fixture.awayTeam),
     index + 1,
   ]),
 );
-
-function compareStandings(left: StandingLike, right: StandingLike) {
-  return (
-    right.points - left.points ||
-    right.goalDifference - left.goalDifference ||
-    right.goalsFor - left.goalsFor ||
-    left.team.name.localeCompare(right.team.name)
-  );
-}
-
-type StandingLike = {
-  team: TeamSummary;
-  points: number;
-  goalDifference: number;
-  goalsFor: number;
-};
 
 function parseGroupPositionLabel(label: string) {
   const matched = label.match(/^([12])º Grupo ([A-L])$/);
@@ -122,7 +106,7 @@ function getBestThirdPlaceTeams(standings: ReturnType<typeof buildGroupStandings
   return standings
     .map((group) => group.rows[2])
     .filter(Boolean)
-    .sort(compareStandings)
+    .sort(compareStandingRows)
     .slice(0, 8);
 }
 
@@ -261,7 +245,7 @@ export async function synchronizeTournamentProgression(client: SyncClient) {
     const homeSlotLabel = match.homeSlotLabel ?? match.homeTeam.name;
     const awaySlotLabel = match.awaySlotLabel ?? match.awayTeam.name;
     const matchNumber = WORLD_CUP_MATCH_NUMBER_BY_SIGNATURE.get(
-      buildFixtureSignature(match.round.name, match.startsAt, homeSlotLabel, awaySlotLabel),
+      buildFixtureSignature(match.round.name, homeSlotLabel, awaySlotLabel),
     );
 
     if (matchNumber) {

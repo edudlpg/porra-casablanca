@@ -1,5 +1,10 @@
 import type { GroupCode, Team } from "@prisma/client";
 
+import {
+  WORLD_CUP_2026_FIFA_RANKINGS,
+  WORLD_CUP_2026_TEAM_CONDUCT_SCORES,
+} from "@/lib/world-cup-tiebreakers";
+
 export type GroupStandingRow = {
   team: Pick<Team, "id" | "name" | "flagUrl" | "groupCode">;
   played: number;
@@ -29,6 +34,40 @@ type MatchWithTeams = {
   homeTeam: Pick<Team, "id" | "name" | "flagUrl" | "groupCode">;
   awayTeam: Pick<Team, "id" | "name" | "flagUrl" | "groupCode">;
 };
+
+type StandingTieBreakers = {
+  fifaRankingByTeamName?: ReadonlyMap<string, number>;
+  teamConductScoreByTeamName?: ReadonlyMap<string, number>;
+};
+
+const defaultStandingTieBreakers: Required<StandingTieBreakers> = {
+  fifaRankingByTeamName: WORLD_CUP_2026_FIFA_RANKINGS,
+  teamConductScoreByTeamName: WORLD_CUP_2026_TEAM_CONDUCT_SCORES,
+};
+
+export function compareStandingRows(
+  left: Pick<GroupStandingRow, "goalDifference" | "goalsFor" | "points" | "team">,
+  right: Pick<GroupStandingRow, "goalDifference" | "goalsFor" | "points" | "team">,
+  tieBreakers: StandingTieBreakers = defaultStandingTieBreakers,
+) {
+  const teamConductScoreByTeamName =
+    tieBreakers.teamConductScoreByTeamName ?? defaultStandingTieBreakers.teamConductScoreByTeamName;
+  const fifaRankingByTeamName =
+    tieBreakers.fifaRankingByTeamName ?? defaultStandingTieBreakers.fifaRankingByTeamName;
+  const leftConductScore = teamConductScoreByTeamName.get(left.team.name) ?? Number.NEGATIVE_INFINITY;
+  const rightConductScore = teamConductScoreByTeamName.get(right.team.name) ?? Number.NEGATIVE_INFINITY;
+  const leftFifaRanking = fifaRankingByTeamName.get(left.team.name) ?? Number.POSITIVE_INFINITY;
+  const rightFifaRanking = fifaRankingByTeamName.get(right.team.name) ?? Number.POSITIVE_INFINITY;
+
+  return (
+    right.points - left.points ||
+    right.goalDifference - left.goalDifference ||
+    right.goalsFor - left.goalsFor ||
+    rightConductScore - leftConductScore ||
+    leftFifaRanking - rightFifaRanking ||
+    left.team.name.localeCompare(right.team.name)
+  );
+}
 
 export function buildGroupStandings(
   teams: Array<Pick<Team, "id" | "name" | "flagUrl" | "groupCode">>,
@@ -104,14 +143,7 @@ export function buildGroupStandings(
           ...row,
           goalDifference: row.goalsFor - row.goalsAgainst,
         }))
-        .sort((left, right) => {
-          return (
-            right.points - left.points ||
-            right.goalDifference - left.goalDifference ||
-            right.goalsFor - left.goalsFor ||
-            left.team.name.localeCompare(right.team.name)
-          );
-        }),
+        .sort(compareStandingRows),
     }));
 }
 
@@ -130,12 +162,5 @@ export function buildBestThirdPlaceRows(standings: GroupStanding[]): BestThirdPl
       };
     })
     .filter((row): row is BestThirdPlaceRow => Boolean(row))
-    .sort((left, right) => {
-      return (
-        right.points - left.points ||
-        right.goalDifference - left.goalDifference ||
-        right.goalsFor - left.goalsFor ||
-        left.team.name.localeCompare(right.team.name)
-      );
-    });
+    .sort(compareStandingRows);
 }

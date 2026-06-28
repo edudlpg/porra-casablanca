@@ -3,6 +3,7 @@ import { EmptyState } from "@/components/layout/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCachedKnockoutBracketMatches } from "@/lib/data-cache";
+import { getBracketSlotDisplayName } from "@/lib/knockout-bracket";
 import { cn } from "@/lib/utils";
 
 const bracketRounds = [
@@ -22,10 +23,6 @@ const bracketRoundLayouts = [
   "pt-[602px] gap-[1216px]",
   "pt-[1290px] gap-[2592px]",
 ] as const;
-
-function getSlotName(slotLabel: string | null, teamName: string) {
-  return slotLabel ?? teamName;
-}
 
 export default async function WorldCupBracketPage() {
   const matches = await getCachedKnockoutBracketMatches();
@@ -71,13 +68,13 @@ export default async function WorldCupBracketPage() {
                           </p>
                           <div className="space-y-1.5">
                             <p className="rounded-2xl bg-slate-50 px-2.5 py-1.5 text-[0.82rem] font-semibold leading-snug text-slate-900">
-                              {getSlotName(match.homeSlotLabel, match.homeTeam.name)}
+                              {getBracketSlotDisplayName(match.homeSlotLabel, match.homeTeam.name)}
                             </p>
                             <p className="text-center text-[0.68rem] font-bold uppercase tracking-[0.14em] text-slate-400">
                               vs
                             </p>
                             <p className="rounded-2xl bg-slate-50 px-2.5 py-1.5 text-[0.82rem] font-semibold leading-snug text-slate-900">
-                              {getSlotName(match.awaySlotLabel, match.awayTeam.name)}
+                              {getBracketSlotDisplayName(match.awaySlotLabel, match.awayTeam.name)}
                             </p>
                           </div>
                         </CardContent>
